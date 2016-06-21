@@ -2,7 +2,7 @@ import intrange.qual.*;
 
 public class Foo {
 
-    public void testSubtypeRules(@FullIntRange int fr, @IntRange(from=0, to=255) int ir, @IntRange int mir, @IntRange(from=255, to=0) int eir) {
+    public void testSubtypeRules(@FullIntRange int fr, @IntRange(from=0, to=255) int ir, @IntRange int mir, @IntRange(from=255, to=0) int eir, int dir) {
         // Assign to top always good
         @FullIntRange int a = fr;
     	@FullIntRange int b = ir;
@@ -13,7 +13,7 @@ public class Foo {
         @IntRange(from=0, to=65535) int e = ir;
         @IntRange(from=0, to=65535) int f = mir; //error
 
-        // test default qualifier parameters
+        // test IntRange qualifier default parameters
         @IntRange int g = fr; //error
         @IntRange int h = ir;
         @IntRange int i = mir;
@@ -32,6 +32,27 @@ public class Foo {
         @IntRange(from=-1, to=255) int p = ir;
         @IntRange(from=0, to=200) int q = ir; //error
         @IntRange(from=1, to=255) int r = ir; //error
+
+        // test default qualifier
+        int s = fr;
+        int t = ir;
+        int u = mir;
+        @IntRange(from=0, to=255) int v = dir; //error
+
+        // test method parameter passing check
+        testMethodParameter(ir);
+        testMethodParameter(mir); //error
+
+        // test method return
+        @IntRange(from=128, to=1000) int w = testMethodReturn(ir); //error
+    }
+
+    private void testMethodParameter(@IntRange(from=0, to=255) int num) {
+    
+    }
+
+    private @IntRange(from=0, to=255) int testMethodReturn(@IntRange(from=0, to=255) int num) {
+        return num;
     }
 
 }
