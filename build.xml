@@ -1,0 +1,198 @@
+<!-- I follow the target naming convention of Apache Ant Style here: https://wiki.apache.org/ant/TheElementsOfAntStyle -->
+<!-- This Ant build xml serves for two purposes:
+        1. build & distribute Read Checker:
+            init dist
+        2. test Read Checker:
+            init-test test
+    The build.xml manages the internal dependences of Read Checker (i.e. test depends on Read Checker bin, etc.)
+    The external dependencies needed for building and testing Read Checker are described in file build.properties
+    -->
+<project name="IntRangeChecker" basedir="." default="dist">
+    <dirname property="intrange-checker.basedir" file="${ant.file.IntRangeChecker}"/>
+    <!-- load properties of external dependencies -->
+    <loadproperties srcFile="build.properties"/>
+
+    <!-- build properties -->
+    <property name="checker.bin" value="${intrange-checker.basedir}/bin"/>
+    <property name="checker.src" value="${intrange-checker.basedir}/src"/>
+    <property name="build.lib" value="${intrange-checker.basedir}/lib"/>
+    <!-- <property name="checker.dist" value="${read-checker.basedir}/bin"/> -->
+
+    <!-- if using jdk.astub, un-comment below properties, and re-configure the right place of your jdk.astub-->
+    <!--property name="jdk.astub" value="${checker.src}/read/jdk.astub"/>
+    <property name="jdk.astub.bin.dir" value="${checker.bin}/read"/-->
+
+    <!-- test properties -->
+    <property name="test" value="${intrange-checker.basedir}/tests" />
+    <property name="test.src" value="${test}/src" />
+    <property name="test.lib" value="${test}/lib" />
+    <property name="test.build" value="${test}/build"/>
+    <property name="test.build.reports" value="${test.build}/reports"/>
+
+    <!-- Defaults, used if the Ant invocation does not set a value. -->
+    <property name="halt.on.test.error" value="true" />
+    <property name="halt.on.test.failure" value="true" />
+
+    <!-- build targets start -->
+    <target name="init"
+        description="link all necessary dependences into ${build.lib}">
+        <mkdir dir="${checker.bin}"/>
+        <mkdir dir="${build.lib}"/>
+
+        <symlink link="${build.lib}/framework.jar" resource="${framework.lib}" overwrite="true"/>
+        <symlink link="${build.lib}/javac.jar" resource="${javac.lib}" overwrite="true"/>
+        <!-- <symlink link="${build.deps}/annotation-file-utilities.jar" resource="${annotation-file-utilities.lib}" overwrite="true"/> -->
+
+        <!-- using jdk.astub specific, need to re-configure the right place of yoru jdk.astub.bin.dir-->
+        <!--copy file="${jdk.astub}" todir="${jdk.astub.bin.dir}"/-->
+    </target>
+
+    <target name="dist" depends="init"
+        description="compile this checker">
+        <pathconvert pathsep=":" property="build.lib.jars">
+        <path>
+            <fileset dir="${build.lib}">
+                <include name="*.jar"/>
+            </fileset>
+        </path>
+        </pathconvert>
+
+        <pathconvert pathsep=" " property="src.checker">
+        <path>
+            <fileset dir="${checker.src}">
+                <include name="**/*.java"/>
+            </fileset>
+        </path>
+        </pathconvert>
+
+        <java fork="true"
+              failonerror="true"
+              classpath="${build.lib.jars}"
+              classname="com.sun.tools.javac.Main">
+            <jvmarg line="-Xbootclasspath/p:${javac.lib}"/>
+            <arg value="-g"/>
+            <arg value="-source"/>
+            <arg value="7"/>
+            <arg value="-target"/>
+            <arg value="7"/>
+            <!-- To not get a warning about bootstrap classpath -->
+            <arg value="-Xlint:-options"/>
+            <arg line="-sourcepath ${checker.src}"/>
+            <arg line="-d ${checker.bin}"/>
+            <arg line="${src.checker}"/>
+        </java>
+    </target>
+
+    <target name="clean" depends="clean-build,clean-test" description="delete all generated files and directories">
+    </target>
+
+    <target name="clean-build"
+        description="delete all generated files and directories by dist target">
+        <delete dir="${checker.bin}" quiet="true"/>
+        <delete dir="${build.lib}" quiet="true"/>
+    </target>
+    <!-- build targets end -->
+
+    <!-- test target start -->
+    <target name="init-test"
+        description="create needs dirs, and prepare the dependences of running tests">
+        <mkdir dir="${test.build}"/>
+        <mkdir dir="${test.build.reports}"/>
+        <mkdir dir="${test.lib}"/>
+        <symlink link="${test.lib}/framework.jar" resource="${framework.lib}" overwrite="true"/>
+        <symlink link="${test.lib}/javac.jar" resource="${javac.lib}" overwrite="true"/>
+        <symlink link="${test.lib}/hamcrest-core.jar" resource="${hamcrest.lib}" overwrite="true"/>
+        <symlink link="${test.lib}/junit.jar" resource="${junit.lib}" overwrite="true"/>
+
+        <pathconvert pathsep=" " property="src.test">
+            <path>
+                <fileset dir="${test.src}">
+                    <include name="**/*.java"/>
+                </fileset>
+            </path>
+        </pathconvert>
+
+        <pathconvert pathsep=":" property="test.lib.jars">
+            <path>
+                <fileset dir="${test.lib}">
+                    <include name="*.jar"/>
+                </fileset>
+            </path>
+        </pathconvert>
+    </target>
+
+    <target name="dist-test" depends="init-test" description="Compile tests">
+        <java fork="true"
+              failonerror="true"
+              classpath="${test.lib.jars}:${checker.bin}"
+              classname="com.sun.tools.javac.Main">
+            <jvmarg line="-Xbootclasspath/p:${javac.lib}"/>
+            <arg value="-g"/>
+            <!-- Make sure we only have Java 7 source code and generate Java 7 bytecode. -->
+            <arg value="-source"/>
+            <arg value="7"/>
+            <arg value="-target"/>
+            <arg value="7"/>
+            <!-- To not get a warning about bootstrap classpath -->
+            <arg value="-Xlint:-options"/>
+            <arg line="-sourcepath ${test.src}"/>
+            <arg line="-d ${test.build}"/>
+            <arg line="${src.test}"/>
+        </java>
+    </target>
+
+    <target name="test" depends="dist-test"
+            description="Run tests for this checker, WITHOUT building anything">
+
+        <!-- set this on the command line for like -Dtest.filter="**/TargetedTest.java" to target specific tests-->
+        <property name="test.filter" value="**/*Test.java"/>
+
+        <condition property="should.emit.debug.str" value="true" else="false">
+            <isset property="emit.test.debug"/>
+        </condition>
+
+        <condition property="debugger.str" value="-Xnoagent -Djava.compiler=NONE -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005" else="">
+            <isset property="debugger.on"/>
+        </condition>
+
+        <!-- Copied from -run-tests target -->
+        <mkdir dir="${test.build.reports}"/>
+
+        <junit fork="true"
+               dir="${intrange-checker.basedir}"
+               printsummary="false"
+               haltonerror="${halt.on.test.error}"
+               haltonfailure="${halt.on.test.failure}">
+            <!--Set JAVAC_JAR so the insert-annotations-to-source can use it-->
+            <!-- <env key="JAVAC_JAR" value="${javac.lib}"/> -->
+            <classpath path="${test.lib.jars}:${test.build}:${checker.bin}"/>
+            <jvmarg line="-Xbootclasspath/p:${javac.lib}"/>
+            <jvmarg line="-ea"/>
+            <!-- <jvmarg line="${debugger.str}"/> -->
+            <sysproperty key="use.hacks" value="${use.hacks.str}"/>
+            <sysproperty key="emit.test.debug" value="${should.emit.debug.str}"/>
+
+            <formatter type="xml"/>
+            <formatter type="brief" usefile="false"/>
+
+            <!-- <test name="ReadTest"/> -->
+            <batchtest todir="${test.build.reports}">
+                <fileset dir="${test.src}">
+                    <include name="${test.filter}"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="clean-test"
+        description="delete all generated files and directories by test target">
+        <delete dir="${test.lib}" quiet="true"/>
+        <delete dir="${test.build}" quiet="true"/>
+    </target>
+    <!-- test target end -->
+
+    <!-- debugging -->
+    <target name="debug"> 
+        <echoproperties/>
+    </target>
+</project>
