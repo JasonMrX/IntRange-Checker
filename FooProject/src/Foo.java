@@ -4,6 +4,7 @@ public class Foo {
 
     public void testSubtypeRules(@FullIntRange int fr, @IntRange(from=0, to=255) int ir, @IntRange int mir, @IntRange(from=255, to=0) int eir, int dir) {
         // Assign to top always good
+        /*
         @FullIntRange int a = fr;
     	@FullIntRange int b = ir;
         @FullIntRange int c = mir;
@@ -17,10 +18,10 @@ public class Foo {
         @IntRange int g = fr; //error
         @IntRange int h = ir;
         @IntRange int i = mir;
-
+        */
         // test error intrange qualifier
-        @IntRange(from=100, to=200) int j = eir; //?? need to be enforced
-
+        @IntRange(from=201, to=200) int j = eir; //?? need to be enforced
+        /*
         // test overlapping scenarios
         @IntRange(from=-255, to=128) int k = ir; //error
         @IntRange(from=128, to=1000) int l = ir; //error
@@ -45,6 +46,7 @@ public class Foo {
 
         // test method return
         @IntRange(from=128, to=1000) int w = testMethodReturn(ir); //error
+        */
     }
 
     private void testMethodParameter(@IntRange(from=0, to=255) int num) {
