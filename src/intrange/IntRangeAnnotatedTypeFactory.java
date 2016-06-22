@@ -14,6 +14,13 @@ import intrange.qual.EmptyRange;
 import intrange.qual.FullIntRange;
 import intrange.qual.IntRange;
 
+/**
+ * AnnotatedTypeFactory for the Integer Range type system
+ * 
+ * @author JasonMrX
+ *
+ */
+
 public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 	
 	protected final AnnotationMirror EMPTYRANGE, FULLINTRANGE;

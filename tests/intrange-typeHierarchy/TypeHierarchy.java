@@ -1,8 +1,9 @@
 import intrange.qual.*;
 
 public class TypeHierarchy {
-	
-	void testMethod(@FullIntRange int fr, @IntRange(from=0, to=255) int ir, @IntRange int mir, @IntRange(from=255, to=0) int eir, int dir) {
+
+	void testMethod(@FullIntRange int fr, @IntRange(from=0, to=255) int ir, 
+			@IntRange int mir, int dir) {
         // Assign to top always good
         @FullIntRange int a = fr;
     	@FullIntRange int b = ir;
@@ -20,9 +21,6 @@ public class TypeHierarchy {
         @IntRange int g = fr; //error
         @IntRange int h = ir;
         @IntRange int i = mir;
-
-        // test error intrange qualifier
-        @IntRange(from=100, to=200) int j = eir; //?? need to be enforced
 
         // test overlapping scenarios
         //:: error: (assignment.type.incompatible)
