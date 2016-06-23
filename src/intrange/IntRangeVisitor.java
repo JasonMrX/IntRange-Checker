@@ -59,15 +59,25 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
 				&& args.get(0).getKind() == Kind.ASSIGNMENT
 				&& args.get(1).getKind() == Kind.ASSIGNMENT) {					
 
-			AssignmentTree argFrom = (AssignmentTree) args.get(0);
-			AssignmentTree argTo = (AssignmentTree) args.get(1);
-			if (argFrom.getExpression().getKind() == Tree.Kind.INT_LITERAL 
-					&& argTo.getExpression().getKind() == Tree.Kind.INT_LITERAL) {
-				int expFrom = (int)((LiteralTree) argFrom.getExpression()).getValue();
-				int expTo = (int)((LiteralTree) argTo.getExpression()).getValue();
-				if (expFrom > expTo) {
-					checker.report(Result.warning("from(" + Integer.toString(expFrom) 
-						+ ").greater.than.to(" + Integer.toString(expTo) + ")"), node);
+			ExpressionTree expFrom = ((AssignmentTree) args.get(0)).getExpression();
+			ExpressionTree expTo = ((AssignmentTree) args.get(1)).getExpression();
+			
+			/*
+			 * ugly. need to be refactored
+			 */
+			if ((expFrom.getKind() == Tree.Kind.INT_LITERAL || expFrom.getKind() == Tree.Kind.LONG_LITERAL)
+					&& (expTo.getKind() == Tree.Kind.INT_LITERAL || expTo.getKind() == Tree.Kind.LONG_LITERAL)) {
+				Number numFrom = expFrom.getKind() == Tree.Kind.INT_LITERAL ?
+									(Integer)((LiteralTree) expFrom).getValue() :
+									(Long)((LiteralTree) expFrom).getValue();
+				Number numTo = expTo.getKind() == Tree.Kind.INT_LITERAL ?
+									(Integer)((LiteralTree) expTo).getValue() :
+									(Long)((LiteralTree) expTo).getValue();
+				long valueFrom = numFrom.longValue();
+				long valueTo = numTo.longValue();
+				if (valueFrom > valueTo) {
+					checker.report(Result.warning("from(" + Long.toString(valueFrom) 
+						+ ").greater.than.to(" + Long.toString(valueTo) + ")"), node);
 				}
 			}
 			

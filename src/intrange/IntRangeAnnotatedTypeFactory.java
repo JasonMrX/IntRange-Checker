@@ -10,6 +10,9 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiveType;
 import org.checkerframework.framework.type.QualifierHierarchy;
+import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
+import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
+import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.type.typeannotator.ListTypeAnnotator;
 import org.checkerframework.framework.type.typeannotator.TypeAnnotator;
 import org.checkerframework.framework.util.AnnotationBuilder;
@@ -17,6 +20,9 @@ import org.checkerframework.framework.util.GraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
+
+import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.Tree;
 
 import intrange.qual.EmptyRange;
 import intrange.qual.FullIntRange;
@@ -43,12 +49,14 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 		}
 	}
 	
-	private AnnotationMirror createAnnotation(String name, int from, int to) {
+	/*
+	private AnnotationMirror createAnnotation(String name, Long from, Long to) {
 		AnnotationBuilder builder = new AnnotationBuilder(processingEnv, name);
 		builder.setValue("from", from);
 		builder.setValue("to", to);
 		return builder.build();
 	}
+	*/
 	
 	@Override 
 	public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
@@ -86,8 +94,8 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 			AnnotationMirror anno = atm.getAnnotationInHierarchy(INTRANGE);
 			
 			if (anno != null && anno.getElementValues().size() == 2) {
-				int valueFrom = AnnotationUtils.getElementValue(anno, "from", Integer.class, true);
-				int valueTo = AnnotationUtils.getElementValue(anno, "to", Integer.class, true);
+				Long valueFrom = AnnotationUtils.getElementValue(anno, "from", Long.class, true);
+				Long valueTo = AnnotationUtils.getElementValue(anno, "to", Long.class, true);
 				if (valueFrom > valueTo) {
 					/* TODO
 					 * bug here. type.invalid error???
@@ -110,6 +118,7 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 			super(factory, bottom);
 		}
 		
+		/*
 		@Override
 		public AnnotationMirror greatestLowerBound(AnnotationMirror a1, 
 				AnnotationMirror a2) {
@@ -132,15 +141,16 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 	        } else if (isSubtype(a2, a1)) {
 	            return a1;
 	        } else {
-	            int a1From = AnnotationUtils.getElementValue(a1, "from", Integer.class, true);
-	            int a2From = AnnotationUtils.getElementValue(a2, "from", Integer.class, true);
-	            int a1To = AnnotationUtils.getElementValue(a1, "from", Integer.class, true);
-	            int a2To = AnnotationUtils.getElementValue(a2, "to", Integer.class, true);
-	            int newFrom = Math.min(a1From, a2From);
-	            int newTo = Math.max(a1To, a2To);
+	            Long a1From = AnnotationUtils.getElementValue(a1, "from", Long.class, true);
+	            Long a2From = AnnotationUtils.getElementValue(a2, "from", Long.class, true);
+	            Long a1To = AnnotationUtils.getElementValue(a1, "from", Long.class, true);
+	            Long a2To = AnnotationUtils.getElementValue(a2, "to", Long.class, true);
+	            Long newFrom = Math.min(a1From, a2From);
+	            Long newTo = Math.max(a1To, a2To);
 	            return createAnnotation(a1.getAnnotationType().toString(), newFrom, newTo);
 	        }
 		}
+		*/
 		
 		@Override
 		public boolean isSubtype(AnnotationMirror rhs, AnnotationMirror lhs) {
@@ -153,10 +163,10 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 				return false;
 			} else if (AnnotationUtils.areSameByClass(lhs, IntRange.class)
 					&& AnnotationUtils.areSameByClass(rhs, IntRange.class)) {
-				int lhsFrom = AnnotationUtils.getElementValue(lhs, "from", Integer.class, true);
-				int lhsTo = AnnotationUtils.getElementValue(lhs, "to", Integer.class, true);
-				int rhsFrom = AnnotationUtils.getElementValue(rhs, "from", Integer.class, true);
-				int rhsTo = AnnotationUtils.getElementValue(rhs, "to", Integer.class, true);
+				Long lhsFrom = AnnotationUtils.getElementValue(lhs, "from", Long.class, true);
+				Long lhsTo = AnnotationUtils.getElementValue(lhs, "to", Long.class, true);
+				Long rhsFrom = AnnotationUtils.getElementValue(rhs, "from", Long.class, true);
+				Long rhsTo = AnnotationUtils.getElementValue(rhs, "to", Long.class, true);
 				if (lhsFrom <= rhsFrom && lhsTo >= rhsTo) {
 					return true;
 				}
@@ -169,6 +179,50 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 		}
 		
 	}
+	
+	@Override
+	protected TreeAnnotator createTreeAnnotator() {
+		return new ListTreeAnnotator(new IntRangeTreeAnnotator(this),
+				new ImplicitsTreeAnnotator(this));
+		
+	}
+	
+	protected class IntRangeTreeAnnotator extends TreeAnnotator {
+		
+		public IntRangeTreeAnnotator(IntRangeAnnotatedTypeFactory factory) {
+			super(factory);
+		}	
+		
+		@Override
+		public Void visitLiteral(LiteralTree tree, AnnotatedTypeMirror type) {
+			String underlyingType = type.getUnderlyingType().toString();
+			if (underlyingType.equals("int") 
+					|| underlyingType.equals("java.lang.Integer")
+					|| underlyingType.equals("char")
+					|| underlyingType.equals("java.lang.Character")) {
+				if (tree.getKind() == Tree.Kind.INT_LITERAL) {
+					Number value = (Integer)tree.getValue();
+					AnnotationMirror intAnno = createIntRangeAnnotation(
+							value.longValue(), 
+							value.longValue());
+					type.replaceAnnotation(intAnno);
+				}
+			}
+			return null;
+		}
+	}
+	
+	private AnnotationMirror createIntRangeAnnotation(Long from, Long to) {
+		if (from > to) {
+			return FULLINTRANGE;
+		}
+		AnnotationBuilder builder = new AnnotationBuilder(processingEnv, IntRange.class);
+		builder.setValue("from", from);
+		builder.setValue("to", to);
+		return builder.build();
+	}
+	
+
 	
 }
 
