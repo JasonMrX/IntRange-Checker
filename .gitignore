@@ -1,5 +1,6 @@
 *~
-
+# class file
+*.class
 # Eclipse output
 bin/
 
