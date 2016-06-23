@@ -18,7 +18,7 @@ public class LiteralImplicitAnnotation {
 		
 		//:: error: (assignment.type.incompatible)
 		@IntRange(from='Z', to='b') int c0 = 'A'; // 'A' = 65;
-		@IntRange(from='Z', to='b') int c1 = 'a'; // 'b' = 97;
+		@IntRange(from='Z', to='b') int c1 = 'a'; // 'a' = 97;
 		//:: error: (assignment.type.incompatible)
 		@IntRange(from='Z', to='b') int c2 = 'z'; // 'z' = 122;
 		
