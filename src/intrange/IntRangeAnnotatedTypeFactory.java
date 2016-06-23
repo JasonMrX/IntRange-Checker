@@ -65,13 +65,13 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 	
 	@Override
 	protected TypeAnnotator createTypeAnnotator() {
-		return new ListTypeAnnotator(new IntRangeAnnotator(this),
+		return new ListTypeAnnotator(new IntRangeTypeAnnotator(this),
 				super.createTypeAnnotator());
 	}
 	
-	private class IntRangeAnnotator extends TypeAnnotator {
+	private class IntRangeTypeAnnotator extends TypeAnnotator {
 		
-		public IntRangeAnnotator(AnnotatedTypeFactory atypeFactory) {
+		public IntRangeTypeAnnotator(AnnotatedTypeFactory atypeFactory) {
 			super(atypeFactory);
 		}
 	
