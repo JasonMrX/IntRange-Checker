@@ -4,7 +4,9 @@ import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.basetype.BaseTypeVisitor;
 import org.checkerframework.framework.source.Result;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.lang.model.element.Element;
 
@@ -28,8 +30,20 @@ import intrange.qual.IntRange;
  */
 public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactory>{
 
+	private Set<Kind> coveredKinds;
+	
 	public IntRangeVisitor(BaseTypeChecker checker) {
 		super(checker);
+		
+		coveredKinds = new HashSet<Kind>(3);
+		coveredKinds.add(Tree.Kind.INT_LITERAL);
+		coveredKinds.add(Tree.Kind.LONG_LITERAL);
+		coveredKinds.add(Tree.Kind.CHAR_LITERAL);
+		
+	}
+	
+	private boolean isCoveredKind(Kind k) {
+		return coveredKinds.contains(k);
 	}
 	
 	@Override
@@ -65,20 +79,46 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
 			/*
 			 * ugly. need to be refactored
 			 */
-			if ((expFrom.getKind() == Tree.Kind.INT_LITERAL || expFrom.getKind() == Tree.Kind.LONG_LITERAL)
-					&& (expTo.getKind() == Tree.Kind.INT_LITERAL || expTo.getKind() == Tree.Kind.LONG_LITERAL)) {
-				Number numFrom = expFrom.getKind() == Tree.Kind.INT_LITERAL ?
-									(Integer)((LiteralTree) expFrom).getValue() :
-									(Long)((LiteralTree) expFrom).getValue();
-				Number numTo = expTo.getKind() == Tree.Kind.INT_LITERAL ?
-									(Integer)((LiteralTree) expTo).getValue() :
-									(Long)((LiteralTree) expTo).getValue();
-				long valueFrom = numFrom.longValue();
-				long valueTo = numTo.longValue();
-				if (valueFrom > valueTo) {
-					checker.report(Result.warning("from(" + Long.toString(valueFrom) 
-						+ ").greater.than.to(" + Long.toString(valueTo) + ")"), node);
+			
+			if (isCoveredKind(expFrom.getKind()) && isCoveredKind(expTo.getKind())) {
+				long valueFrom, valueTo;
+				String strFrom, strTo;
+				
+				switch (expFrom.getKind()) {
+				case INT_LITERAL: 
+					valueFrom = ((Number) ((LiteralTree) expFrom).getValue()).longValue();
+					strFrom = Long.toString(valueFrom);
+					break;
+				case LONG_LITERAL:
+					valueFrom = (Long) ((LiteralTree) expFrom).getValue();
+					strFrom = Long.toString(valueFrom);
+					break;
+				default: // CHAR_LITERAL:
+					valueFrom = (long) ((Character) ((LiteralTree) expFrom).getValue());
+					strFrom = "'" + (new Character((char) valueFrom)) + "'";
+					break;
 				}
+				
+				switch (expTo.getKind()) {
+				case INT_LITERAL:
+					valueTo = ((Number) ((LiteralTree) expTo).getValue()).longValue();
+					strTo = Long.toString(valueTo);
+					break;
+				case LONG_LITERAL:
+					valueTo = (Long) ((LiteralTree) expTo).getValue();
+					strTo = Long.toString(valueTo);
+					break;
+				default: // CHAR_LITERAL:
+					valueTo = (long) ((Character) ((LiteralTree) expTo).getValue());
+					strTo = "'" + (new Character((char) valueTo)) + "'";
+					break;
+				}
+				
+				if (valueFrom > valueTo) {
+					checker.report(Result.warning("from(" + strFrom 
+					+ ").greater.than.to(" + strTo + ")"), node);
+				}
+					
 			}
 			
 		}
