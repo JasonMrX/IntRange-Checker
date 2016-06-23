@@ -1,8 +1,14 @@
 import intrange.qual.*;
+import org.checkerframework.common.value.qual.*;
 
 public class Foo {
 
-    public void testSubtypeRules(@FullIntRange int fr, @IntRange(from=0, to=255) int ir, @IntRange int mir, @IntRange(from=255, to=0) int eir, int dir) {
+    public void testSubtypeRules(//@FullIntRange int fr,
+            //@IntRange(from=0, to=255) int ir, 
+            //@UnknownVal @IntVal({12, 65, 21, 546, 65, 31, 5, 31, 31, 321, 35, 54, 13}) int eir,
+            @IntRange(from=255, to=0) int eir
+            //,@FullIntRange int mir, int dir
+            ) {
         // Assign to top always good
         /*
         @FullIntRange int a = fr;
@@ -20,7 +26,7 @@ public class Foo {
         @IntRange int i = mir;
         */
         // test error intrange qualifier
-        @IntRange(from=201, to=200) int j = eir; //?? need to be enforced
+        //@IntRange(from=0, to=2000) int j = eir; //?? need to be enforced
         /*
         // test overlapping scenarios
         @IntRange(from=-255, to=128) int k = ir; //error
@@ -48,7 +54,7 @@ public class Foo {
         @IntRange(from=128, to=1000) int w = testMethodReturn(ir); //error
         */
     }
-
+/*
     private void testMethodParameter(@IntRange(from=0, to=255) int num) {
     
     }
@@ -56,5 +62,6 @@ public class Foo {
     private @IntRange(from=0, to=255) int testMethodReturn(@IntRange(from=0, to=255) int num) {
         return num;
     }
+    */
 
 }

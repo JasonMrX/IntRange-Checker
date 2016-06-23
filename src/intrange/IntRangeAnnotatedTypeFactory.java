@@ -4,7 +4,14 @@ import javax.lang.model.element.AnnotationMirror;
 
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
+import org.checkerframework.framework.source.Result;
+import org.checkerframework.framework.type.AnnotatedTypeFactory;
+import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiveType;
 import org.checkerframework.framework.type.QualifierHierarchy;
+import org.checkerframework.framework.type.typeannotator.ListTypeAnnotator;
+import org.checkerframework.framework.type.typeannotator.TypeAnnotator;
 import org.checkerframework.framework.util.GraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
@@ -23,11 +30,12 @@ import intrange.qual.IntRange;
 
 public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 	
-	protected final AnnotationMirror EMPTYRANGE, FULLINTRANGE;
+	protected final AnnotationMirror EMPTYRANGE, INTRANGE, FULLINTRANGE;
 
 	public IntRangeAnnotatedTypeFactory(BaseTypeChecker checker) {
 		super(checker);
 		EMPTYRANGE = AnnotationUtils.fromClass(elements, EmptyRange.class);
+		INTRANGE = AnnotationUtils.fromClass(elements, IntRange.class);
 		FULLINTRANGE = AnnotationUtils.fromClass(elements, FullIntRange.class);
 		if (this.getClass().equals(IntRangeAnnotatedTypeFactory.class)) {
 			this.postInit();
@@ -39,15 +47,52 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 		return new IntRangeQualifierHierarchy(factory, EMPTYRANGE);
 	}
 	
-	/*
+	@Override
+	protected TypeAnnotator createTypeAnnotator() {
+		return new ListTypeAnnotator(new IntRangeAnnotator(this),
+				super.createTypeAnnotator());
+	}
+	
 	private class IntRangeAnnotator extends TypeAnnotator {
 		
 		public IntRangeAnnotator(AnnotatedTypeFactory atypeFactory) {
 			super(atypeFactory);
 		}
+	
+		@Override
+		public Void visitPrimitive(AnnotatedPrimitiveType type, Void p) {
+			replaceWithFullIntRangeIfFromGreaterThanTo((AnnotatedTypeMirror) type);
+			 
+			return super.visitPrimitive(type, p);
+		}
+		
+		@Override
+		public Void visitDeclared(AnnotatedDeclaredType type, Void p) {
+			replaceWithFullIntRangeIfFromGreaterThanTo((AnnotatedTypeMirror) type);
+			
+			return super.visitDeclared(type, p);
+		}
+		
+		private void replaceWithFullIntRangeIfFromGreaterThanTo (
+				AnnotatedTypeMirror atm) {
+			AnnotationMirror anno = atm.getAnnotationInHierarchy(INTRANGE);
+			
+			if (anno != null && anno.getElementValues().size() == 2) {
+				int valueFrom = AnnotationUtils.getElementValue(anno, "from", Integer.class, true);
+				int valueTo = AnnotationUtils.getElementValue(anno, "to", Integer.class, true);
+				if (valueFrom > valueTo) {
+					/* TODO
+					 * bug here. type.invalid error???
+					 */
+					//atm.replaceAnnotation(FULLINTRANGE);
+					//System.err.println("Hello I am the compiler: " + atm.toString());
+				}
+				
+			}
+			
+		}
 		
 	}
-	*/
 	
 	private final class IntRangeQualifierHierarchy extends
 			GraphQualifierHierarchy {
