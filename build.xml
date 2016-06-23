@@ -121,7 +121,7 @@
         </pathconvert>
     </target>
 
-    <target name="dist-test" depends="init-test" description="Compile tests">
+    <target name="dist-test" depends="init-test,dist" description="Compile tests">
         <java fork="true"
               failonerror="true"
               classpath="${test.lib.jars}:${checker.bin}"
