@@ -196,18 +196,28 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 		@Override
 		public Void visitLiteral(LiteralTree tree, AnnotatedTypeMirror type) {
 			String underlyingType = type.getUnderlyingType().toString();
+			
 			if (underlyingType.equals("int") 
 					|| underlyingType.equals("java.lang.Integer")
 					|| underlyingType.equals("char")
-					|| underlyingType.equals("java.lang.Character")) {
+					|| underlyingType.equals("java.lang.Character")
+					|| underlyingType.equals("long") 
+					|| underlyingType.equals("java.lang.Long")) {
 				if (tree.getKind() == Tree.Kind.INT_LITERAL) {
-					Number value = (Integer)tree.getValue();
-					AnnotationMirror intAnno = createIntRangeAnnotation(
-							value.longValue(), 
-							value.longValue());
+					Number value = (Integer) tree.getValue();
+					AnnotationMirror intAnno = createLiteralAnnotation(value.longValue());
 					type.replaceAnnotation(intAnno);
+				} else if (tree.getKind() == Tree.Kind.CHAR_LITERAL) {
+					long value = (Character) tree.getValue();
+					AnnotationMirror charAnno = createLiteralAnnotation(value);
+					type.replaceAnnotation(charAnno);
+				} else if (tree.getKind() == Tree.Kind.LONG_LITERAL) {
+					long value = (Long) tree.getValue();
+					AnnotationMirror longAnno = createLiteralAnnotation(value);
+					type.replaceAnnotation(longAnno);
 				}
 			}
+			
 			return null;
 		}
 	}
@@ -222,6 +232,9 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 		return builder.build();
 	}
 	
+	private AnnotationMirror createLiteralAnnotation(Long value) {
+		return createIntRangeAnnotation(value, value);
+	}
 
 	
 }
