@@ -1,4 +1,6 @@
 *~
+# tmp ignore Foo.java
+FooProject/src/Foo.java
 # class file
 *.class
 # Eclipse output
