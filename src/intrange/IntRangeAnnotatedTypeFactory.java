@@ -12,6 +12,7 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiv
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.typeannotator.ListTypeAnnotator;
 import org.checkerframework.framework.type.typeannotator.TypeAnnotator;
+import org.checkerframework.framework.util.AnnotationBuilder;
 import org.checkerframework.framework.util.GraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
@@ -40,6 +41,13 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 		if (this.getClass().equals(IntRangeAnnotatedTypeFactory.class)) {
 			this.postInit();
 		}
+	}
+	
+	private AnnotationMirror createAnnotation(String name, int from, int to) {
+		AnnotationBuilder builder = new AnnotationBuilder(processingEnv, name);
+		builder.setValue("from", from);
+		builder.setValue("to", to);
+		return builder.build();
 	}
 	
 	@Override 
@@ -100,6 +108,38 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory{
 		public IntRangeQualifierHierarchy(
 				MultiGraphQualifierHierarchy.MultiGraphFactory factory, AnnotationMirror bottom) {
 			super(factory, bottom);
+		}
+		
+		@Override
+		public AnnotationMirror greatestLowerBound(AnnotationMirror a1, 
+				AnnotationMirror a2) {
+			if (isSubtype(a1, a2)) {
+				return a1;
+			} else if (isSubtype(a2, a1)) {
+				return a2;
+			} else {
+				return EMPTYRANGE;
+			}
+		}
+		
+		@Override
+		public AnnotationMirror leastUpperBound(AnnotationMirror a1,
+				AnnotationMirror a2) {
+			if (!AnnotationUtils.areSameIgnoringValues(getTopAnnotation(a1), getTopAnnotation(a2))) {
+	            return null;
+	        } else if (isSubtype(a1, a2)) {
+	            return a2;
+	        } else if (isSubtype(a2, a1)) {
+	            return a1;
+	        } else {
+	            int a1From = AnnotationUtils.getElementValue(a1, "from", Integer.class, true);
+	            int a2From = AnnotationUtils.getElementValue(a2, "from", Integer.class, true);
+	            int a1To = AnnotationUtils.getElementValue(a1, "from", Integer.class, true);
+	            int a2To = AnnotationUtils.getElementValue(a2, "to", Integer.class, true);
+	            int newFrom = Math.min(a1From, a2From);
+	            int newTo = Math.max(a1To, a2To);
+	            return createAnnotation(a1.getAnnotationType().toString(), newFrom, newTo);
+	        }
 		}
 		
 		@Override
