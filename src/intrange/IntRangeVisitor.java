@@ -56,11 +56,7 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
             return (long) ((Character) ((LiteralTree) exp).getValue());
         default:
             throw new IllegalArgumentException(
-                    "exp should be within the covered kinds (INT_LITERAL, LONG_LITERAL, CHAR_LITERAL"); // ?How
-                                                                                                        // to
-                                                                                                        // deal
-                                                                                                        // with
-                                                                                                        // this?
+                    "exp should be within the covered kinds (INT_LITERAL, LONG_LITERAL, CHAR_LITERAL"); 
         }
     }
 
