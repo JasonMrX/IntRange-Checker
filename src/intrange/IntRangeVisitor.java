@@ -93,7 +93,7 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
                 long valueTo = getValueFromCoveredKinds(expTo);
 
                 if (valueFrom > valueTo) {
-                    checker.report(Result.warning("from.greater.than.to"), node);
+                    checker.report(Result.warning("from.greater.than.to", valueFrom, valueTo), node);
                 }
 
             }
