@@ -14,8 +14,7 @@ import org.checkerframework.framework.qual.TypeUseLocation;
 @ImplicitFor(literals = { LiteralKind.NULL }, typeNames = { java.lang.Void.class })
 @SubtypeOf({ IntRange.class })
 @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
-@TargetLocations({ TypeUseLocation.EXPLICIT_LOWER_BOUND,
-    TypeUseLocation.EXPLICIT_UPPER_BOUND })
+@TargetLocations({ TypeUseLocation.EXPLICIT_LOWER_BOUND, TypeUseLocation.EXPLICIT_UPPER_BOUND })
 public @interface EmptyRange {
 
 }

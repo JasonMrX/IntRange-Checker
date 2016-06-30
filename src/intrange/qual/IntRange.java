@@ -11,7 +11,7 @@ import org.checkerframework.framework.qual.SubtypeOf;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE_PARAMETER, ElementType.TYPE_USE })
 public @interface IntRange {
-	long from() default Long.MIN_VALUE;
-	long to() default Long.MAX_VALUE;
+    long from() default Long.MIN_VALUE;
+
+    long to() default Long.MAX_VALUE;
 }
-    
