@@ -5,8 +5,10 @@ public class ControlFlowTests {
     void testMethod(@IntRange(from=0, to=255) int rangeInt, 
             int fullInt, 
             int fullInt2,
+            int fullInt3,
             @IntRange(from=0, to=500) int firstPart,
-            @IntRange(from=501, to=1000) int secondPart) {
+            @IntRange(from=501, to=1000) int secondPart,
+            boolean bool) {
         
         @IntRange(from=0, to=255) int a = rangeInt; //OK
         if (rangeInt > 128) {
@@ -29,6 +31,14 @@ public class ControlFlowTests {
             @IntRange(from=0, to=500) int tmp = fullInt2; //OK
         }
         @IntRange(from=0, to=1000) int e = fullInt2; //OK
+        
+        fullInt = firstPart;
+        @IntRange(from=0, to=501) int k = fullInt; //OK
+        if (bool) {
+            fullInt = secondPart;
+        }
+        k = fullInt; //error fullInt => [0, 1000]
+        @IntRange(from=0, to=1001) int i = fullInt; //OK
         
     }
     
