@@ -4,7 +4,10 @@ import javax.lang.model.element.AnnotationMirror;
 
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
-import org.checkerframework.framework.source.Result;
+import org.checkerframework.framework.flow.CFAbstractAnalysis;
+import org.checkerframework.framework.flow.CFTransfer;
+import org.checkerframework.framework.flow.CFStore;
+import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
@@ -22,11 +25,10 @@ import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGra
 import org.checkerframework.javacutil.AnnotationUtils;
 
 import com.sun.source.tree.LiteralTree;
-import com.sun.source.tree.Tree;
-
 import intrange.qual.EmptyRange;
 import intrange.qual.FullIntRange;
 import intrange.qual.IntRange;
+
 
 /**
  * AnnotatedTypeFactory for the Integer Range type system
@@ -56,6 +58,12 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
      * builder.build(); }
      */
 
+    @Override 
+    public CFTransfer createFlowTransferFunction(
+            CFAbstractAnalysis<CFValue, CFStore, CFTransfer> analysis) {
+        return new IntRangeTransfer(analysis);
+    }
+    
     @Override
     public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
         return new IntRangeQualifierHierarchy(factory, EMPTYRANGE);
