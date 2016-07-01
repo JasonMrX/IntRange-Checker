@@ -224,7 +224,7 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         return builder.build();
     }
 
-    private AnnotationMirror createLiteralAnnotation(Long value) {
+    private AnnotationMirror createLiteralAnnotation(long value) {
         return createIntRangeAnnotation(value, value);
     }
 

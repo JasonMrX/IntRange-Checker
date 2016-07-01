@@ -32,13 +32,13 @@ public class ControlFlowTests {
         }
         @IntRange(from=0, to=1000) int e = fullInt2; //OK
         
-        fullInt = firstPart;
-        @IntRange(from=0, to=501) int k = fullInt; //OK
+        fullInt3 = firstPart;
+        @IntRange(from=0, to=501) int k = fullInt3; //OK
         if (bool) {
             fullInt = secondPart;
         }
-        k = fullInt; //error fullInt => [0, 1000]
-        @IntRange(from=0, to=1001) int i = fullInt; //OK
+        k = fullInt3; //error fullInt => [0, 1000]
+        @IntRange(from=0, to=1001) int i = fullInt3; //OK
         
     }
     
