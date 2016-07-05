@@ -214,7 +214,7 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
     }
 
-    private AnnotationMirror createIntRangeAnnotation(long from, long to) {
+    public AnnotationMirror createIntRangeAnnotation(long from, long to) {
         if (from > to) {
             return FULLINTRANGE;
         }
