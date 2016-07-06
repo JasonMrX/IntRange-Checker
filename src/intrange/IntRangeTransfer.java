@@ -1,8 +1,6 @@
 package intrange;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -11,6 +9,7 @@ import javax.lang.model.type.TypeKind;
 import org.checkerframework.dataflow.analysis.RegularTransferResult;
 import org.checkerframework.dataflow.analysis.TransferInput;
 import org.checkerframework.dataflow.analysis.TransferResult;
+import org.checkerframework.dataflow.cfg.node.IntegerDivisionNode;
 import org.checkerframework.dataflow.cfg.node.Node;
 import org.checkerframework.dataflow.cfg.node.NumericalAdditionNode;
 import org.checkerframework.dataflow.cfg.node.NumericalMultiplicationNode;
@@ -21,8 +20,6 @@ import org.checkerframework.framework.flow.CFTransfer;
 import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
-
-import com.sun.source.tree.Tree.Kind;
 
 import intrange.IntRangeAnnotatedTypeFactory;
 import intrange.qual.IntRange;
@@ -46,7 +43,7 @@ public class IntRangeTransfer extends CFTransfer {
     }
 
     private boolean isCoveredKind(Node n) {
-        return coveredKinds.contains(n.getType());
+        return coveredKinds.contains(n.getType().getKind());
     }
     
     private AnnotationMirror createIntRangeAnnotation(Range range) {
@@ -148,6 +145,21 @@ public class IntRangeTransfer extends CFTransfer {
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.MULTIPLICATION, p);
+        return createNewResult(transferResult, resultRange);
+    }
+    
+    @Override
+    public TransferResult<CFValue, CFStore> visitIntegerDivision(
+            IntegerDivisionNode n, TransferInput<CFValue, CFStore> p) {
+        TransferResult<CFValue, CFStore> transferResult = super
+                .visitIntegerDivision(n, p);
+        if (!isCoveredKind(n.getLeftOperand()) 
+                || !isCoveredKind(n.getRightOperand())) {
+            return transferResult;
+        }
+        Range resultRange = calculateNumericalBinaryOp(
+                n.getLeftOperand(), n.getRightOperand(),
+                NumericalBinaryOps.DIVISION, p);
         return createNewResult(transferResult, resultRange);
     }
             
