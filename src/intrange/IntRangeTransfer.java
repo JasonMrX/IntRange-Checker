@@ -21,6 +21,7 @@ import org.checkerframework.javacutil.AnnotationUtils;
 
 import intrange.IntRangeAnnotatedTypeFactory;
 import intrange.qual.IntRange;
+import intrange.util.Range;
 
 public class IntRangeTransfer extends CFTransfer {
     
@@ -33,17 +34,6 @@ public class IntRangeTransfer extends CFTransfer {
         
     }
 
-    private class Range {
-        
-        public final long from;
-        public final long to;
-        
-        public Range(long from, long to) {
-            this.from = from;
-            this.to = to;
-        }
-        
-    }
     
     private AnnotationMirror createIntRangeAnnotation(Range range) {
         if (range.from > range.to) {
@@ -79,47 +69,20 @@ public class IntRangeTransfer extends CFTransfer {
         REMAINDER, 
         MULTIPLICATION;
     }
-
-    private Range calculateAdditionRange(Range lefts, Range rights) {
-        long resultFrom = lefts.from + rights.from;
-        long resultTo = lefts.to + rights.to;
-        return new Range(resultFrom, resultTo);
-    }
-    
-    private Range calculateSubtractionRange(Range lefts, Range rights) {
-        long resultFrom = lefts.from - rights.to;
-        long resultTo = lefts.to - rights.from;
-        return new Range(resultFrom, resultTo);
-    }
-    
-    private Range calculateMultiplicationRange(Range lefts, Range rights) {
-        long[] possibleValues = new long[4];
-        possibleValues[0] = lefts.from * rights.from;
-        possibleValues[1] = lefts.from * rights.to;
-        possibleValues[2] = lefts.to * rights.from;
-        possibleValues[3] = lefts.to * rights.to;
-        long resultFrom = Long.MAX_VALUE;
-        long resultTo = Long.MIN_VALUE;
-        for (long pv : possibleValues) {
-            resultFrom = Math.min(resultFrom, pv);
-            resultTo = Math.max(resultTo, pv);
-        }
-        return new Range(resultFrom, resultTo);
-    }
     
     private Range calculateNumericalBinaryOp(
             Node leftNode, Node rightNode,
             NumericalBinaryOps op,
             TransferInput<CFValue, CFStore> p) {
-        Range lefts = getIntRange(leftNode, p);
-        Range rights = getIntRange(rightNode, p);
+        Range leftRange = getIntRange(leftNode, p);
+        Range rightRange = getIntRange(rightNode, p);
         switch (op) {
         case ADDITION:
-            return calculateAdditionRange(lefts, rights);
+            return leftRange.plus(rightRange);
         case SUBTRACTION:
-            return calculateSubtractionRange(lefts, rights);
+            return leftRange.minus(rightRange);
         case MULTIPLICATION:
-            return calculateMultiplicationRange(lefts, rights);
+            return leftRange.times(rightRange);
         default:
             throw new UnsupportedOperationException();
         }
