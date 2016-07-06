@@ -1,9 +1,13 @@
 import intrange.qual.*;
 
-public class TypeHierarchy {
-
-	void testMethod(@FullIntRange int fr, @IntRange(from=0, to=255) int ir, 
-			@IntRange int mir, int dir) {
+class SubTyping {
+    
+	public void subTypingTest(
+	        @FullIntRange int fr, 
+	        @IntRange(from=0, to=255) int ir, 
+			@IntRange int mir, 
+			int dir) {
+	    
         // Assign to top always good
         @FullIntRange int a = fr;
     	@FullIntRange int b = ir;

@@ -1,8 +1,8 @@
 import intrange.qual.*;
 
-public class NumericalOperationTests {
+public class Binaries {
 
-    void testMethod(
+    void BinariesTest(
             @IntRange(from=-5, to=5) int a,
             @IntRange(from=10, to=20) int b,
             @IntRange(from=-20, to=-10) int c

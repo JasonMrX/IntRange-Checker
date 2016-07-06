@@ -14,7 +14,7 @@ public class IntRangeTest extends CheckerFrameworkTest{
     
     @Parameters
     public static String[] getTestDirs() {
-        return new String[]{"typeHierarchy", "fromGreaterThanTo", "literalImplicit", "controlFlow"};
+        return new String[]{"intrange"};
     }   
     
 }

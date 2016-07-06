@@ -1,8 +1,9 @@
 import intrange.qual.*;
 
-public class ControlFlowTests {
+public class ControlFlow {
 
-    void testMethod(@IntRange(from=0, to=255) int rangeInt, 
+    public void controlFlowTest(
+            @IntRange(from=0, to=255) int rangeInt, 
             int fullInt, 
             int fullInt2,
             int fullInt3,
