@@ -83,6 +83,10 @@ public class IntRangeTransfer extends CFTransfer {
             return leftRange.minus(rightRange);
         case MULTIPLICATION:
             return leftRange.times(rightRange);
+        case DIVISION:
+            return leftRange.divide(rightRange);
+        case REMAINDER:
+            return leftRange.remainder(rightRange);
         default:
             throw new UnsupportedOperationException();
         }
