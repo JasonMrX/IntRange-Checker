@@ -1,5 +1,8 @@
 package intrange;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.lang.model.element.AnnotationMirror;
 
 import org.checkerframework.dataflow.analysis.RegularTransferResult;
@@ -90,10 +93,17 @@ public class IntRangeTransfer extends CFTransfer {
     }
     
     private Range calculateMultiplicationRange(Range lefts, Range rights) {
-        long resultFrom = Math.min(lefts.from * rights.from, 
-                Math.min(lefts.from * rights.to, lefts.to * rights.from));
-        long resultTo = Math.max(lefts.to * rights.to, 
-                Math.min(lefts.from * rights.to, lefts.to * rights.from));
+        long[] possibleValues = new long[4];
+        possibleValues[0] = lefts.from * rights.from;
+        possibleValues[1] = lefts.from * rights.to;
+        possibleValues[2] = lefts.to * rights.from;
+        possibleValues[3] = lefts.to * rights.to;
+        long resultFrom = Long.MAX_VALUE;
+        long resultTo = Long.MIN_VALUE;
+        for (long pv : possibleValues) {
+            resultFrom = Math.min(resultFrom, pv);
+            resultTo = Math.max(resultTo, pv);
+        }
         return new Range(resultFrom, resultTo);
     }
     
