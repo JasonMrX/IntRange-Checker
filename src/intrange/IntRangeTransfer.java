@@ -1,9 +1,12 @@
 package intrange;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.type.TypeKind;
 
 import org.checkerframework.dataflow.analysis.RegularTransferResult;
 import org.checkerframework.dataflow.analysis.TransferInput;
@@ -19,6 +22,8 @@ import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
 
+import com.sun.source.tree.Tree.Kind;
+
 import intrange.IntRangeAnnotatedTypeFactory;
 import intrange.qual.IntRange;
 import intrange.util.Range;
@@ -27,13 +32,22 @@ public class IntRangeTransfer extends CFTransfer {
     
     AnnotatedTypeFactory atypefactory;
     
+    private Set<TypeKind> coveredKinds;
+    
     public IntRangeTransfer(
             CFAbstractAnalysis<CFValue, CFStore, CFTransfer> analysis) {
         super(analysis);
         atypefactory = analysis.getTypeFactory();
         
+        coveredKinds = new HashSet<TypeKind>(3);
+        coveredKinds.add(TypeKind.INT);
+        coveredKinds.add(TypeKind.LONG);
+        coveredKinds.add(TypeKind.CHAR);
     }
 
+    private boolean isCoveredKind(Node n) {
+        return coveredKinds.contains(n.getType());
+    }
     
     private AnnotationMirror createIntRangeAnnotation(Range range) {
         if (range.from > range.to) {
@@ -97,6 +111,10 @@ public class IntRangeTransfer extends CFTransfer {
             NumericalAdditionNode n, TransferInput<CFValue, CFStore> p) {
         TransferResult<CFValue, CFStore> transferResult = super
                 .visitNumericalAddition(n, p);
+        if (!isCoveredKind(n.getLeftOperand()) 
+                || !isCoveredKind(n.getRightOperand())) {
+            return transferResult;
+        }
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.ADDITION, p);
@@ -108,6 +126,10 @@ public class IntRangeTransfer extends CFTransfer {
             NumericalSubtractionNode n, TransferInput<CFValue, CFStore> p) {
         TransferResult<CFValue, CFStore> transferResult = super
                 .visitNumericalSubtraction(n, p);
+        if (!isCoveredKind(n.getLeftOperand()) 
+                || !isCoveredKind(n.getRightOperand())) {
+            return transferResult;
+        }
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.SUBTRACTION, p);
@@ -119,11 +141,16 @@ public class IntRangeTransfer extends CFTransfer {
             NumericalMultiplicationNode n, TransferInput<CFValue, CFStore> p) {
         TransferResult<CFValue, CFStore> transferResult = super
                 .visitNumericalMultiplication(n, p);
+        if (!isCoveredKind(n.getLeftOperand()) 
+                || !isCoveredKind(n.getRightOperand())) {
+            return transferResult;
+        }
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.MULTIPLICATION, p);
         return createNewResult(transferResult, resultRange);
     }
+            
 }
 
 
