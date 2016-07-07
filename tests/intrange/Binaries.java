@@ -4,7 +4,7 @@ public class Binaries {
     
     public void misc(int a, double b) {
         int c = a * 3;
-        int d = b + 2;
+        double d = b + 2;
     }
     
     public void add(
