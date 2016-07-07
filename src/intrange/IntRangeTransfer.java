@@ -60,6 +60,9 @@ public class IntRangeTransfer extends CFTransfer {
     private TransferResult<CFValue, CFStore> createNewResult(
             TransferResult<CFValue, CFStore> result, 
             Range resultRange) {
+        if (resultRange == null) {
+            return result;
+        }
         AnnotationMirror stringVal = createIntRangeAnnotation(resultRange);
         CFValue newResultValue = analysis.createSingleAnnotationValue(
                 stringVal, result.getResultValue().getType().getUnderlyingType());
@@ -105,6 +108,10 @@ public class IntRangeTransfer extends CFTransfer {
             Node leftNode, Node rightNode,
             NumericalBinaryOps op,
             TransferInput<CFValue, CFStore> p) {
+        if (!isCoveredKind(leftNode) 
+                || !isCoveredKind(rightNode)) {
+            return null;
+        }
         Range leftRange = getIntRange(leftNode, p);
         Range rightRange = getIntRange(rightNode, p);
         switch (op) {
@@ -132,10 +139,6 @@ public class IntRangeTransfer extends CFTransfer {
             NumericalAdditionNode n, TransferInput<CFValue, CFStore> p) {
         TransferResult<CFValue, CFStore> transferResult = super
                 .visitNumericalAddition(n, p);
-        if (!isCoveredKind(n.getLeftOperand()) 
-                || !isCoveredKind(n.getRightOperand())) {
-            return transferResult;
-        }
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.ADDITION, p);
@@ -147,10 +150,6 @@ public class IntRangeTransfer extends CFTransfer {
             NumericalSubtractionNode n, TransferInput<CFValue, CFStore> p) {
         TransferResult<CFValue, CFStore> transferResult = super
                 .visitNumericalSubtraction(n, p);
-        if (!isCoveredKind(n.getLeftOperand()) 
-                || !isCoveredKind(n.getRightOperand())) {
-            return transferResult;
-        }
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.SUBTRACTION, p);
@@ -162,10 +161,6 @@ public class IntRangeTransfer extends CFTransfer {
             NumericalMultiplicationNode n, TransferInput<CFValue, CFStore> p) {
         TransferResult<CFValue, CFStore> transferResult = super
                 .visitNumericalMultiplication(n, p);
-        if (!isCoveredKind(n.getLeftOperand()) 
-                || !isCoveredKind(n.getRightOperand())) {
-            return transferResult;
-        }
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.MULTIPLICATION, p);
@@ -177,10 +172,6 @@ public class IntRangeTransfer extends CFTransfer {
             IntegerDivisionNode n, TransferInput<CFValue, CFStore> p) {
         TransferResult<CFValue, CFStore> transferResult = super
                 .visitIntegerDivision(n, p);
-        if (!isCoveredKind(n.getLeftOperand()) 
-                || !isCoveredKind(n.getRightOperand())) {
-            return transferResult;
-        }
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.DIVISION, p);
@@ -192,10 +183,6 @@ public class IntRangeTransfer extends CFTransfer {
             IntegerRemainderNode n, TransferInput<CFValue, CFStore> p) {
         TransferResult<CFValue, CFStore> transferResult = super
                 .visitIntegerRemainder(n, p);
-        if (!isCoveredKind(n.getLeftOperand()) 
-                || !isCoveredKind(n.getRightOperand())) {
-            return transferResult;
-        }
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.REMAINDER, p);
@@ -207,10 +194,6 @@ public class IntRangeTransfer extends CFTransfer {
             LeftShiftNode n, TransferInput<CFValue, CFStore> p) {
         TransferResult<CFValue, CFStore> transferResult = super
                 .visitLeftShift(n, p);
-        if (!isCoveredKind(n.getLeftOperand()) 
-                || !isCoveredKind(n.getRightOperand())) {
-            return transferResult;
-        }
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.SHIFT_LEFT, p);
@@ -222,10 +205,6 @@ public class IntRangeTransfer extends CFTransfer {
             SignedRightShiftNode n, TransferInput<CFValue, CFStore> p) {
         TransferResult<CFValue, CFStore> transferResult = super
                 .visitSignedRightShift(n, p);
-        if (!isCoveredKind(n.getLeftOperand()) 
-                || !isCoveredKind(n.getRightOperand())) {
-            return transferResult;
-        }
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.SIGNED_SHIFT_RIGHT, p);
