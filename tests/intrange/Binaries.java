@@ -126,17 +126,26 @@ public class Binaries {
     }
      
     public void shiftLeft(
-            @IntRange(from=-2, to=10) int a) {
+            @IntRange(from=2, to=10) int l,
+            @IntRange(from=1, to=2) int r) {
         
-        @IntRange(from=-8, to=40) int b = a << 2;
+        @IntRange(from=8, to=40) int b = l << 2;
         //:: error: (assignment.type.incompatible)
-        @IntRange(from=-7, to=40) int c = a << 2;
+        @IntRange(from=9, to=40) int c = l << 2;
         //:: error: (assignment.type.incompatible)
-        @IntRange(from=-8, to=39) int d = a << 2;
+        @IntRange(from=8, to=39) int d = l << 2;
         
-        int e = a << -1;
+        
+        @IntRange(from=4, to=40) int e = l << r;
         //:: error: (assignment.type.incompatible)
-        @IntRange(from=-2000000L, to=2000000L) int f = a << -1;
+        @IntRange(from=5, to=40) int f = l << r;
+        //:: error: (assignment.type.incompatible)
+        @IntRange(from=4, to=39) int g = l << r;
+        
+        
+        int h = l << -1;
+        //:: error: (assignment.type.incompatible)
+        @IntRange(from=-2000000L, to=2000000L) int i = l << -1;
         
     }
 }

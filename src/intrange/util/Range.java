@@ -2,8 +2,8 @@ package intrange.util;
 
 public class Range {
     
-    public long from;
-    public long to;
+    public final long from;
+    public final long to;
     
     private Range getRangeFromPossibleValues(long[] possibleValues) {
         long resultFrom = Long.MAX_VALUE;
@@ -116,14 +116,18 @@ public class Range {
                 || right.to < 0 || right.to > 31) {
             return new Range(Long.MIN_VALUE, Long.MAX_VALUE);
         }
-        long resultFrom = from << right.to;
-        long resultTo = to << right.to;
+        long resultFrom = from << (from >= 0 ? right.from : right.to);
+        long resultTo = to << (to >= 0 ? right.to : right.from);
         return new Range(resultFrom, resultTo);
     }
+
+    
     
     /*
      * TODO:
      * How to handle overflow/underflow?
+     * How to handle division by zero?
+     * How to handle shift out of range [0, 31]?
      */
     
     
