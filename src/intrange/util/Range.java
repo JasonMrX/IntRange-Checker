@@ -120,7 +120,17 @@ public class Range {
         long resultTo = to << (to >= 0 ? right.to : right.from);
         return new Range(resultFrom, resultTo);
     }
-
+    
+    public Range signedShiftRight(Range right) {
+        if (right.from < 0 || right.from > 31
+                || right.to < 0 || right.to > 31) {
+            return new Range(Long.MIN_VALUE, Long.MAX_VALUE);
+        }
+        long resultFrom = from >> (from >= 0 ? right.to : right.from);
+        long resultTo = to >> (to >= 0 ? right.from : right.to);
+        return new Range(resultFrom, resultTo);
+    }
+    
     
     
     /*

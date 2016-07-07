@@ -145,7 +145,18 @@ public class Binaries {
         
         int h = l << -1;
         //:: error: (assignment.type.incompatible)
-        @IntRange(from=-2000000L, to=2000000L) int i = l << -1;
+        @IntRange(from=-2000000L, to=2000000L) int i = l << -1;   
+    }
+    
+    public void signedShiftRight(
+            @IntRange(from=-8, to=-3) int l,
+            @IntRange(from=1, to=2) int r) {
+        
+        @IntRange(from=-4, to=-1) int a = l >> r;
+        //:: error: (assignment.type.incompatible)
+        @IntRange(from=-3, to=-1) int b = l >> r;
+        //:: error: (assignment.type.incompatible)
+        @IntRange(from=-4, to=-2) int c = l >> r;
         
     }
 }

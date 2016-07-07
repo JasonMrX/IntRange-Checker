@@ -16,6 +16,7 @@ import org.checkerframework.dataflow.cfg.node.Node;
 import org.checkerframework.dataflow.cfg.node.NumericalAdditionNode;
 import org.checkerframework.dataflow.cfg.node.NumericalMultiplicationNode;
 import org.checkerframework.dataflow.cfg.node.NumericalSubtractionNode;
+import org.checkerframework.dataflow.cfg.node.SignedRightShiftNode;
 import org.checkerframework.framework.flow.CFAbstractAnalysis;
 import org.checkerframework.framework.flow.CFStore;
 import org.checkerframework.framework.flow.CFTransfer;
@@ -81,7 +82,8 @@ public class IntRangeTransfer extends CFTransfer {
         DIVISION, 
         REMAINDER, 
         MULTIPLICATION,
-        SHIFT_LEFT;
+        SHIFT_LEFT,
+        SIGNED_SHIFT_RIGHT;
     }
     
     private Range calculateNumericalBinaryOp(
@@ -103,6 +105,8 @@ public class IntRangeTransfer extends CFTransfer {
             return leftRange.remainder(rightRange);
         case SHIFT_LEFT:
             return leftRange.shiftLeft(rightRange);
+        case SIGNED_SHIFT_RIGHT:
+            return leftRange.signedShiftRight(rightRange);
         default:
             throw new UnsupportedOperationException();
         }
@@ -195,6 +199,21 @@ public class IntRangeTransfer extends CFTransfer {
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.SHIFT_LEFT, p);
+        return createNewResult(transferResult, resultRange);
+    }
+    
+    @Override
+    public TransferResult<CFValue, CFStore> visitSignedRightShift(
+            SignedRightShiftNode n, TransferInput<CFValue, CFStore> p) {
+        TransferResult<CFValue, CFStore> transferResult = super
+                .visitSignedRightShift(n, p);
+        if (!isCoveredKind(n.getLeftOperand()) 
+                || !isCoveredKind(n.getRightOperand())) {
+            return transferResult;
+        }
+        Range resultRange = calculateNumericalBinaryOp(
+                n.getLeftOperand(), n.getRightOperand(),
+                NumericalBinaryOps.SIGNED_SHIFT_RIGHT, p);
         return createNewResult(transferResult, resultRange);
     }
             
