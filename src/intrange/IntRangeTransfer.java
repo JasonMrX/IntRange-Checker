@@ -11,6 +11,7 @@ import org.checkerframework.dataflow.analysis.TransferInput;
 import org.checkerframework.dataflow.analysis.TransferResult;
 import org.checkerframework.dataflow.cfg.node.IntegerDivisionNode;
 import org.checkerframework.dataflow.cfg.node.IntegerRemainderNode;
+import org.checkerframework.dataflow.cfg.node.LeftShiftNode;
 import org.checkerframework.dataflow.cfg.node.Node;
 import org.checkerframework.dataflow.cfg.node.NumericalAdditionNode;
 import org.checkerframework.dataflow.cfg.node.NumericalMultiplicationNode;
@@ -79,7 +80,8 @@ public class IntRangeTransfer extends CFTransfer {
         SUBTRACTION, 
         DIVISION, 
         REMAINDER, 
-        MULTIPLICATION;
+        MULTIPLICATION,
+        SHIFT_LEFT;
     }
     
     private Range calculateNumericalBinaryOp(
@@ -99,6 +101,8 @@ public class IntRangeTransfer extends CFTransfer {
             return leftRange.divide(rightRange);
         case REMAINDER:
             return leftRange.remainder(rightRange);
+        case SHIFT_LEFT:
+            return leftRange.shiftLeft(rightRange);
         default:
             throw new UnsupportedOperationException();
         }
@@ -176,6 +180,21 @@ public class IntRangeTransfer extends CFTransfer {
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.REMAINDER, p);
+        return createNewResult(transferResult, resultRange);
+    }
+    
+    @Override
+    public TransferResult<CFValue, CFStore> visitLeftShift(
+            LeftShiftNode n, TransferInput<CFValue, CFStore> p) {
+        TransferResult<CFValue, CFStore> transferResult = super
+                .visitLeftShift(n, p);
+        if (!isCoveredKind(n.getLeftOperand()) 
+                || !isCoveredKind(n.getRightOperand())) {
+            return transferResult;
+        }
+        Range resultRange = calculateNumericalBinaryOp(
+                n.getLeftOperand(), n.getRightOperand(),
+                NumericalBinaryOps.SHIFT_LEFT, p);
         return createNewResult(transferResult, resultRange);
     }
             

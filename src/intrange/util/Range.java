@@ -20,8 +20,13 @@ public class Range {
     }
     
     public Range(long from, long to) {
-        this.from = from;
-        this.to = to;
+        if (from > to) {
+            this.from = Long.MIN_VALUE;
+            this.to = Long.MAX_VALUE;
+        } else {
+            this.from = from;
+            this.to = to;
+        }
     }
     
     public Range plus(Range right) {
@@ -49,7 +54,7 @@ public class Range {
         long resultFrom = Long.MIN_VALUE;
         long resultTo = Long.MAX_VALUE;
 
-        // be careful of divided by zero!
+        // TODO: be careful of divided by zero!
         if (from > 0 && right.from >= 0) {
             resultFrom = from / Math.max(right.to, 1);
             resultTo = to / Math.max(right.from, 1);
@@ -104,6 +109,22 @@ public class Range {
         possibleValues[8] = Math.max(to, -Math.abs(right.to) + 1);
         return getRangeFromPossibleValues(possibleValues);
     }
+    
+    public Range shiftLeft(Range right) {
+        // TODO: warning if right operand may be out of [0, 31]
+        if (right.from < 0 || right.from > 31
+                || right.to < 0 || right.to > 31) {
+            return new Range(Long.MIN_VALUE, Long.MAX_VALUE);
+        }
+        long resultFrom = from << right.to;
+        long resultTo = to << right.to;
+        return new Range(resultFrom, resultTo);
+    }
+    
+    /*
+     * TODO:
+     * How to handle overflow/underflow?
+     */
     
     
 }
