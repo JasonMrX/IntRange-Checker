@@ -15,13 +15,14 @@ public class Range {
         return new Range(resultFrom, resultTo);
     }
     
-    private Range merge(Range right) {
-        return new Range(Math.min(from, right.from), Math.max(to, right.to));
-    }
-    
     public Range(long from, long to) {
         this.from = from;
         this.to = to;
+    }
+    
+    public Range() {
+        this.from = Long.MIN_VALUE;
+        this.to = Long.MAX_VALUE;
     }
     
     public Range plus(Range right) {
@@ -109,7 +110,7 @@ public class Range {
         // TODO: warning if right operand may be out of [0, 31]
         if (right.from < 0 || right.from > 31
                 || right.to < 0 || right.to > 31) {
-            return new Range(Long.MIN_VALUE, Long.MAX_VALUE);
+            return new Range();
         }
         long resultFrom = from << (from >= 0 ? right.from : right.to);
         long resultTo = to << (to >= 0 ? right.to : right.from);
@@ -119,7 +120,7 @@ public class Range {
     public Range signedShiftRight(Range right) {
         if (right.from < 0 || right.from > 31
                 || right.to < 0 || right.to > 31) {
-            return new Range(Long.MIN_VALUE, Long.MAX_VALUE);
+            return new Range();
         }
         long resultFrom = from >> (from >= 0 ? right.to : right.from);
         long resultTo = to >> (to >= 0 ? right.from : right.to);

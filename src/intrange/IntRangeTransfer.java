@@ -72,9 +72,16 @@ public class IntRangeTransfer extends CFTransfer {
         // TODO: need to handle FULLINTRANGE 
         CFValue value = p.getValueOfSubNode(subNode);
         AnnotationMirror rangeAnno = value.getType().getAnnotation(IntRange.class);
-        return new Range(
-                AnnotationUtils.getElementValue(rangeAnno, "from", Long.class, true),
-                AnnotationUtils.getElementValue(rangeAnno, "to", Long.class, true));
+        long valueFrom;
+        long valueTo;
+        if (rangeAnno == null) {
+            valueFrom = Long.MIN_VALUE;
+            valueTo = Long.MAX_VALUE;
+        } else {
+            valueFrom = AnnotationUtils.getElementValue(rangeAnno, "from", Long.class, true);
+            valueTo = AnnotationUtils.getElementValue(rangeAnno, "to", Long.class, true);
+        }
+        return new Range(valueFrom, valueTo);
     }
     
     enum NumericalBinaryOps {

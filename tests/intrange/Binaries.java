@@ -2,6 +2,11 @@ import intrange.qual.*;
 
 public class Binaries {
     
+    public void misc(int a, double b) {
+        int c = a * 3;
+        int d = b + 2;
+    }
+    
     public void add(
             @IntRange(from=-5, to=5) int a,
             @IntRange(from=10, to=20) int b,
@@ -9,11 +14,6 @@ public class Binaries {
         //:: error: (assignment.type.incompatible)
         @IntRange(from=6, to=25) int plus1 = a + b; // error
         @IntRange(from=0, to=25) int plus2 = a + b; //OK
-        
-        double c = 3.0;
-        double d = c + a;
-        
-        int e = fullRange + a;
     }
     
     public void subtract(
@@ -22,9 +22,6 @@ public class Binaries {
         //:: error: (assignment.type.incompatible)
         @IntRange(from=-25, to=-6) int minus1 = a - b; //error
         @IntRange(from=-25, to=-5) int minus2 = a - b; //OK
-        
-        double c = 4.0;
-        double d = c - a;
     }
     
     public void multiply(
@@ -42,9 +39,6 @@ public class Binaries {
         //:: error: (assignment.type.incompatible)
         @IntRange(from=-400, to=-101) int mult5 = b * c; //error
         @IntRange(from=-400, to=-100) int mult6 = b * c; //OK
-        
-        double d = 10.0;
-        double e = d - a;
     }
     
     public void divide(
