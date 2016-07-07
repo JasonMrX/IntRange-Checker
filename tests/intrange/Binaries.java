@@ -4,13 +4,16 @@ public class Binaries {
     
     public void add(
             @IntRange(from=-5, to=5) int a,
-            @IntRange(from=10, to=20) int b) {
+            @IntRange(from=10, to=20) int b,
+            int fullRange) {
         //:: error: (assignment.type.incompatible)
         @IntRange(from=6, to=25) int plus1 = a + b; // error
         @IntRange(from=0, to=25) int plus2 = a + b; //OK
         
         double c = 3.0;
         double d = c + a;
+        
+        int e = fullRange + a;
     }
     
     public void subtract(

@@ -69,6 +69,7 @@ public class IntRangeTransfer extends CFTransfer {
     
     private Range getIntRange(Node subNode, 
             TransferInput<CFValue, CFStore> p) {
+        // TODO: need to handle FULLINTRANGE 
         CFValue value = p.getValueOfSubNode(subNode);
         AnnotationMirror rangeAnno = value.getType().getAnnotation(IntRange.class);
         return new Range(

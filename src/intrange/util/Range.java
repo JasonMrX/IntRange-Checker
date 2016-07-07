@@ -20,13 +20,8 @@ public class Range {
     }
     
     public Range(long from, long to) {
-        if (from > to) {
-            this.from = Long.MIN_VALUE;
-            this.to = Long.MAX_VALUE;
-        } else {
-            this.from = from;
-            this.to = to;
-        }
+        this.from = from;
+        this.to = to;
     }
     
     public Range plus(Range right) {
