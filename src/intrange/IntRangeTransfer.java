@@ -10,6 +10,7 @@ import org.checkerframework.dataflow.analysis.RegularTransferResult;
 import org.checkerframework.dataflow.analysis.TransferInput;
 import org.checkerframework.dataflow.analysis.TransferResult;
 import org.checkerframework.dataflow.cfg.node.IntegerDivisionNode;
+import org.checkerframework.dataflow.cfg.node.IntegerRemainderNode;
 import org.checkerframework.dataflow.cfg.node.Node;
 import org.checkerframework.dataflow.cfg.node.NumericalAdditionNode;
 import org.checkerframework.dataflow.cfg.node.NumericalMultiplicationNode;
@@ -160,6 +161,21 @@ public class IntRangeTransfer extends CFTransfer {
         Range resultRange = calculateNumericalBinaryOp(
                 n.getLeftOperand(), n.getRightOperand(),
                 NumericalBinaryOps.DIVISION, p);
+        return createNewResult(transferResult, resultRange);
+    }
+    
+    @Override
+    public TransferResult<CFValue, CFStore> visitIntegerRemainder(
+            IntegerRemainderNode n, TransferInput<CFValue, CFStore> p) {
+        TransferResult<CFValue, CFStore> transferResult = super
+                .visitIntegerRemainder(n, p);
+        if (!isCoveredKind(n.getLeftOperand()) 
+                || !isCoveredKind(n.getRightOperand())) {
+            return transferResult;
+        }
+        Range resultRange = calculateNumericalBinaryOp(
+                n.getLeftOperand(), n.getRightOperand(),
+                NumericalBinaryOps.REMAINDER, p);
         return createNewResult(transferResult, resultRange);
     }
             

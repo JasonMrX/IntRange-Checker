@@ -114,4 +114,15 @@ public class Binaries {
         @IntRange(from=-5, to=4) int s93 = ze / ze; 
     }
     
+    public void remainder(
+            @IntRange(from=5, to=10) int a,
+            @IntRange(from=1, to=7) int b) {
+        
+        //:: error: (assignment.type.incompatible)
+        @IntRange(from=-1, to=2) int c = a % b;
+        
+        @IntRange(from=0, to=10) int d = a % b;
+        
+    }
+    
 }
