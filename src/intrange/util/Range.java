@@ -127,7 +127,17 @@ public class Range {
         return new Range(resultFrom, resultTo);
     }
     
+    public Range unaryPlus() {
+        return new Range(from, to);
+    }
     
+    public Range unaryMinus() {
+        return new Range(-to, -from);
+    }
+    
+    public Range bitwiseComplement() {
+        return new Range(~to, ~from);
+    }
     
     /*
      * TODO:

@@ -9,12 +9,15 @@ import javax.lang.model.type.TypeKind;
 import org.checkerframework.dataflow.analysis.RegularTransferResult;
 import org.checkerframework.dataflow.analysis.TransferInput;
 import org.checkerframework.dataflow.analysis.TransferResult;
+import org.checkerframework.dataflow.cfg.node.BitwiseComplementNode;
 import org.checkerframework.dataflow.cfg.node.IntegerDivisionNode;
 import org.checkerframework.dataflow.cfg.node.IntegerRemainderNode;
 import org.checkerframework.dataflow.cfg.node.LeftShiftNode;
 import org.checkerframework.dataflow.cfg.node.Node;
 import org.checkerframework.dataflow.cfg.node.NumericalAdditionNode;
+import org.checkerframework.dataflow.cfg.node.NumericalMinusNode;
 import org.checkerframework.dataflow.cfg.node.NumericalMultiplicationNode;
+import org.checkerframework.dataflow.cfg.node.NumericalPlusNode;
 import org.checkerframework.dataflow.cfg.node.NumericalSubtractionNode;
 import org.checkerframework.dataflow.cfg.node.SignedRightShiftNode;
 import org.checkerframework.framework.flow.CFAbstractAnalysis;
@@ -211,6 +214,62 @@ public class IntRangeTransfer extends CFTransfer {
         return createNewResult(transferResult, resultRange);
     }
             
+    /*
+     * Ignore BITWISE_COMPLEMENT
+     */
+    
+    enum NumericalUnaryOps{
+        PLUS, MINUS, BITWISE_COMPLEMENT;
+    }
+    
+    private Range calculateNumericalUnaryOp(Node operand,
+            NumericalUnaryOps op, TransferInput<CFValue, CFStore> p) {
+        if (!isCoveredKind(operand)) {
+            return null;
+        }
+        Range operandRange = getIntRange(operand, p);
+        switch (op) {
+        case PLUS:
+            return operandRange.unaryPlus();
+        case MINUS:
+            return operandRange.unaryMinus();
+        case BITWISE_COMPLEMENT:
+            return operandRange.bitwiseComplement();
+        default:
+            throw new UnsupportedOperationException();
+        }
+    }
+    
+    @Override
+    public TransferResult<CFValue, CFStore> visitNumericalPlus(
+            NumericalPlusNode n, TransferInput<CFValue, CFStore> p) {
+        TransferResult<CFValue, CFStore> transferResult = super
+                .visitNumericalPlus(n, p);
+        Range resultRange = calculateNumericalUnaryOp(n.getOperand(),
+                NumericalUnaryOps.PLUS, p);
+        return createNewResult(transferResult, resultRange);
+    }
+    
+    @Override
+    public TransferResult<CFValue, CFStore> visitNumericalMinus(
+            NumericalMinusNode n, TransferInput<CFValue, CFStore> p) {
+        TransferResult<CFValue, CFStore> transferResult = super
+                .visitNumericalMinus(n, p);
+        Range resultRange = calculateNumericalUnaryOp(n.getOperand(),
+                NumericalUnaryOps.MINUS, p);
+        return createNewResult(transferResult, resultRange);
+    }
+    
+    @Override
+    public TransferResult<CFValue, CFStore> visitBitwiseComplement(
+            BitwiseComplementNode n, TransferInput<CFValue, CFStore> p) {
+        TransferResult<CFValue, CFStore> transferResult = super
+                .visitBitwiseComplement(n, p);
+        Range resultRange = calculateNumericalUnaryOp(n.getOperand(),
+                NumericalUnaryOps.MINUS, p);
+        return createNewResult(transferResult, resultRange);
+    }
+    
 }
 
 
