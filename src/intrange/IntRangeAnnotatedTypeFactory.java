@@ -190,11 +190,9 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 return false;
             } else if (AnnotationUtils.areSameByClass(lhs, IntRange.class)
                     && AnnotationUtils.areSameByClass(rhs, IntRange.class)) {
-                Long lhsFrom = AnnotationUtils.getElementValue(lhs, "from", Long.class, true);
-                Long lhsTo = AnnotationUtils.getElementValue(lhs, "to", Long.class, true);
-                Long rhsFrom = AnnotationUtils.getElementValue(rhs, "from", Long.class, true);
-                Long rhsTo = AnnotationUtils.getElementValue(rhs, "to", Long.class, true);
-                if (lhsFrom <= rhsFrom && lhsTo >= rhsTo) {
+                Range lhsRange = getIntRange(lhs);
+                Range rhsRange = getIntRange(rhs);
+                if (lhsRange.from <= rhsRange.from && lhsRange.to >= rhsRange.to) {
                     return true;
                 }
             }
