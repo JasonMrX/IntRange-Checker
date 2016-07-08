@@ -31,6 +31,14 @@ import intrange.IntRangeAnnotatedTypeFactory;
 import intrange.qual.IntRange;
 import intrange.util.Range;
 
+
+/**
+ * Transfer functions for IntRange Checker
+ * 
+ * @author JasonMrX
+ *
+ */
+
 public class IntRangeTransfer extends CFTransfer {
     
     AnnotatedTypeFactory atypefactory;
@@ -212,10 +220,6 @@ public class IntRangeTransfer extends CFTransfer {
                 NumericalBinaryOps.SIGNED_SHIFT_RIGHT, p);
         return createNewResult(transferResult, resultRange);
     }
-            
-    /*
-     * Ignore BITWISE_COMPLEMENT
-     */
     
     enum NumericalUnaryOps{
         PLUS, MINUS, BITWISE_COMPLEMENT;

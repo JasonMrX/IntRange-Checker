@@ -1,5 +1,12 @@
 package intrange.util;
 
+/**
+ * The Range Class with mathematics operations
+ * 
+ * @author JasonMrX
+ *
+ */
+
 public class Range {
     
     public final long from;
