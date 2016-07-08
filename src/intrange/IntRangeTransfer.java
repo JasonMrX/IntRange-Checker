@@ -84,13 +84,12 @@ public class IntRangeTransfer extends CFTransfer {
         return IntRangeAnnotatedTypeFactory.getIntRange(rangeAnno);
     }
     
-    /*
+    /**
      * Binary operation refinement that are supported by intrange checker.
      * Ignore UNSIGNED_SHIFT_RIGHT, BITWISE_AND, BITWISE_OR, BITWISE_XOR,
      * because their resulted ranges are too complex to be determined.
      * Treated as FULLINTRANGE.
      */
-    
     enum NumericalBinaryOps {
         ADDITION, 
         SUBTRACTION, 
