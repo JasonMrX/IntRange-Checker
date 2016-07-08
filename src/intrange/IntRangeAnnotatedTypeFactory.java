@@ -25,9 +25,13 @@ import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGra
 import org.checkerframework.javacutil.AnnotationUtils;
 
 import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.UnaryTree;
+
 import intrange.qual.EmptyRange;
 import intrange.qual.FullIntRange;
 import intrange.qual.IntRange;
+import intrange.util.Range;
 
 
 /**
@@ -62,6 +66,39 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     public CFTransfer createFlowTransferFunction(
             CFAbstractAnalysis<CFValue, CFStore, CFTransfer> analysis) {
         return new IntRangeTransfer(analysis);
+    }
+    
+    @Override
+    public AnnotatedTypeMirror getAnnotatedType(Tree tree) {
+        if (tree.getKind() == Tree.Kind.POSTFIX_DECREMENT
+                || tree.getKind() == Tree.Kind.POSTFIX_INCREMENT) {
+            return getPostFixAnno((UnaryTree) tree,
+                    super.getAnnotatedType(tree));
+        } else {
+            return super.getAnnotatedType(tree);
+        }
+    }
+    
+    private AnnotatedTypeMirror getPostFixAnno(UnaryTree tree,
+            AnnotatedTypeMirror anno) {
+        if (anno.hasAnnotation(IntRange.class)) {
+            return postFixInt(anno, 
+                    tree.getKind() == Tree.Kind.POSTFIX_INCREMENT);
+        }
+        return anno;
+    }
+    
+    private AnnotatedTypeMirror postFixInt(AnnotatedTypeMirror anno, 
+            boolean increment) {
+        Range range = getIntRange(anno.getAnnotation(IntRange.class));
+        Range resultRange;
+        if (increment) {
+            resultRange = new Range(range.from - 1, range.to - 1);
+        } else {
+            resultRange = new Range(range.from + 1, range.to + 1);
+        }
+        anno.replaceAnnotation(createIntRangeAnnotation(resultRange));
+        return anno;
     }
     
     @Override
@@ -214,18 +251,31 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
     }
 
-    public AnnotationMirror createIntRangeAnnotation(long from, long to) {
-        if (from > to) {
+    public AnnotationMirror createIntRangeAnnotation(Range range) {
+        if (range.from > range.to 
+                || (range.from == Long.MIN_VALUE && range.to == Long.MAX_VALUE)) {
             return FULLINTRANGE;
         }
         AnnotationBuilder builder = new AnnotationBuilder(processingEnv, IntRange.class);
-        builder.setValue("from", from);
-        builder.setValue("to", to);
+        builder.setValue("from", range.from);
+        builder.setValue("to", range.to);
         return builder.build();
     }
 
     private AnnotationMirror createLiteralAnnotation(long value) {
-        return createIntRangeAnnotation(value, value);
+        return createIntRangeAnnotation(new Range(value, value));
+    }
+    
+    public static Range getIntRange(AnnotationMirror rangeAnno) {
+        if (rangeAnno == null) {
+            return new Range();
+        } else {
+            return new Range(
+                    AnnotationUtils.getElementValue(
+                            rangeAnno, "from", Long.class, true),
+                    AnnotationUtils.getElementValue(
+                            rangeAnno, "to", Long.class, true));
+        }
     }
 
 }

@@ -12,11 +12,10 @@ class Unaries {
     
     public void postfix() {
         int i = 3;
-        /* postfix increment/decrement not working -- need to explore why
         @IntRange(from=3, to=3) int a = i++;
         @IntRange(from=4, to=4) int b = i;
         @IntRange(from=4, to=4) int c = i--;
-        */
+        
     }
     
     public void prefix() {

@@ -25,7 +25,6 @@ import org.checkerframework.framework.flow.CFStore;
 import org.checkerframework.framework.flow.CFTransfer;
 import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
-import org.checkerframework.javacutil.AnnotationUtils;
 
 import intrange.IntRangeAnnotatedTypeFactory;
 import intrange.qual.IntRange;
@@ -61,11 +60,8 @@ public class IntRangeTransfer extends CFTransfer {
     }
     
     private AnnotationMirror createIntRangeAnnotation(Range range) {
-        if (range.from > range.to) {
-            return ((IntRangeAnnotatedTypeFactory) atypefactory).FULLINTRANGE;
-        }
         return ((IntRangeAnnotatedTypeFactory) atypefactory).
-                createIntRangeAnnotation(range.from, range.to);
+                createIntRangeAnnotation(range);
     }
     
     private TransferResult<CFValue, CFStore> createNewResult(
@@ -83,18 +79,9 @@ public class IntRangeTransfer extends CFTransfer {
     
     private Range getIntRange(Node subNode, 
             TransferInput<CFValue, CFStore> p) {
-        // TODO: need to handle FULLINTRANGE 
         CFValue value = p.getValueOfSubNode(subNode);
         AnnotationMirror rangeAnno = value.getType().getAnnotation(IntRange.class);
-        if (rangeAnno == null) {
-            return new Range();
-        } else {
-            return new Range(
-                    AnnotationUtils.getElementValue(
-                            rangeAnno, "from", Long.class, true),
-                    AnnotationUtils.getElementValue(
-                            rangeAnno, "to", Long.class, true));
-        }
+        return IntRangeAnnotatedTypeFactory.getIntRange(rangeAnno);
     }
     
     /*
