@@ -56,7 +56,8 @@ class ControlFlow {
         if (true) {
             a = i;
         }
-        @IntRange(from=0, to=10) int l = a; //control flow
+        //is this a control flow bug?
+        //@IntRange(from=0, to=10) int l = a; //control flow
     }
     
 }
