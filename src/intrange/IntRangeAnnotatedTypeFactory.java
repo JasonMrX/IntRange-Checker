@@ -159,26 +159,33 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             super(factory, bottom);
         }
 
-        /*
-         * @Override public AnnotationMirror greatestLowerBound(AnnotationMirror
-         * a1, AnnotationMirror a2) { if (isSubtype(a1, a2)) { return a1; } else
-         * if (isSubtype(a2, a1)) { return a2; } else { return EMPTYRANGE; } }
-         * 
-         * @Override public AnnotationMirror leastUpperBound(AnnotationMirror
-         * a1, AnnotationMirror a2) { if
-         * (!AnnotationUtils.areSameIgnoringValues(getTopAnnotation(a1),
-         * getTopAnnotation(a2))) { return null; } else if (isSubtype(a1, a2)) {
-         * return a2; } else if (isSubtype(a2, a1)) { return a1; } else { Long
-         * a1From = AnnotationUtils.getElementValue(a1, "from", Long.class,
-         * true); Long a2From = AnnotationUtils.getElementValue(a2, "from",
-         * Long.class, true); Long a1To = AnnotationUtils.getElementValue(a1,
-         * "from", Long.class, true); Long a2To =
-         * AnnotationUtils.getElementValue(a2, "to", Long.class, true); Long
-         * newFrom = Math.min(a1From, a2From); Long newTo = Math.max(a1To,
-         * a2To); return createAnnotation(a1.getAnnotationType().toString(),
-         * newFrom, newTo); } }
-         */
+        
+        @Override
+        public AnnotationMirror greatestLowerBound(AnnotationMirror a1, AnnotationMirror a2) {
+            if (isSubtype(a1, a2)) {
+                return a1;
+            } else if (isSubtype(a2, a1)) {
+                return a2;
+            } else {
+                return EMPTYRANGE;
+            }
+        }
 
+        @Override
+        public AnnotationMirror leastUpperBound(AnnotationMirror a1, AnnotationMirror a2) {
+            if (!AnnotationUtils.areSameIgnoringValues(getTopAnnotation(a1), getTopAnnotation(a2))) {
+                return null;
+            } else if (isSubtype(a1, a2)) {
+                return a2;
+            } else if (isSubtype(a2, a1)) {
+                return a1;
+            } else {
+                Range range1 = getIntRange(a1);
+                Range range2 = getIntRange(a2);
+                return createIntRangeAnnotation(range1.merge(range2));
+            }
+        }
+         
         @Override
         public boolean isSubtype(AnnotationMirror rhs, AnnotationMirror lhs) {
 

@@ -1,6 +1,6 @@
 import intrange.qual.*;
 
-public class ControlFlow {
+class ControlFlow {
 
 //    public void controlFlowTest(
 //            @IntRange(from=0, to=255) int rangeInt, 
@@ -42,5 +42,16 @@ public class ControlFlow {
 //        @IntRange(from=0, to=1001) int i = fullInt3; //OK
 //        
 //    }
+    
+    public void simple(
+            boolean b,
+            @IntRange(from=0, to=10) int i,
+            @IntRange(from=20, to=30) int j) {
+        int a = i;
+        if (b) {
+            a = j;
+        }
+        @IntRange(from=0, to=30) int k = a;
+    }
     
 }

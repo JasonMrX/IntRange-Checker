@@ -32,6 +32,12 @@ public class Range {
         this.to = Long.MAX_VALUE;
     }
     
+    public Range merge(Range right) {
+        long resultFrom = Math.min(from, right.from);
+        long resultTo = Math.max(to, right.to);
+        return new Range(resultFrom, resultTo);
+    }
+    
     public Range plus(Range right) {
         long resultFrom = from + right.from;
         long resultTo = to + right.to;
