@@ -52,6 +52,11 @@ class ControlFlow {
             a = j;
         }
         @IntRange(from=0, to=30) int k = a;
+        
+        if (true) {
+            a = i;
+        }
+        @IntRange(from=0, to=10) int l = a; //control flow
     }
     
 }

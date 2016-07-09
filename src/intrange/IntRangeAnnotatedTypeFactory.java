@@ -205,9 +205,6 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
 
             return false;
-            /**
-             * TODO Detect From <= TO
-             */
         }
 
     }
@@ -282,5 +279,13 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                             rangeAnno, "to", Long.class, true));
         }
     }
+    
+    /**
+     * TODO:
+     * underflow/overflow detect
+     * divided by zero
+     * array initialize
+     * 
+     */
 
 }
