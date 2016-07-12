@@ -66,4 +66,11 @@ class ControlFlow {
         
     }
     
+    public void comparison(@IntRange(from=0, to=100) int a) {
+        @IntRange(from=0, to=50) int b;
+        if (a < 30) {
+            b = a; //OK
+        }
+    }
+    
 }
