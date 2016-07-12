@@ -56,8 +56,14 @@ class ControlFlow {
         if (true) {
             a = i;
         }
-        //is this a control flow bug?
+        // is this a control flow bug?
         //@IntRange(from=0, to=10) int l = a; //control flow
+        
+        // can we handle these kind of control flow refinement?
+        if (k > 15) {
+            //@IntRange(from=15, to=30) int s = k;
+        }
+        
     }
     
 }
