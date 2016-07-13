@@ -14,12 +14,16 @@ import org.checkerframework.dataflow.analysis.RegularTransferResult;
 import org.checkerframework.dataflow.analysis.TransferInput;
 import org.checkerframework.dataflow.analysis.TransferResult;
 import org.checkerframework.dataflow.cfg.node.BitwiseComplementNode;
+import org.checkerframework.dataflow.cfg.node.EqualToNode;
+import org.checkerframework.dataflow.cfg.node.GreaterThanNode;
 import org.checkerframework.dataflow.cfg.node.GreaterThanOrEqualNode;
 import org.checkerframework.dataflow.cfg.node.IntegerDivisionNode;
 import org.checkerframework.dataflow.cfg.node.IntegerRemainderNode;
 import org.checkerframework.dataflow.cfg.node.LeftShiftNode;
 import org.checkerframework.dataflow.cfg.node.LessThanNode;
+import org.checkerframework.dataflow.cfg.node.LessThanOrEqualNode;
 import org.checkerframework.dataflow.cfg.node.Node;
+import org.checkerframework.dataflow.cfg.node.NotEqualNode;
 import org.checkerframework.dataflow.cfg.node.NumericalAdditionNode;
 import org.checkerframework.dataflow.cfg.node.NumericalMinusNode;
 import org.checkerframework.dataflow.cfg.node.NumericalMultiplicationNode;
@@ -265,6 +269,10 @@ public class IntRangeTransfer extends CFTransfer {
         return createNewResult(transferResult, resultRange);
     }
     
+    enum ComparisonOperators {
+        EQUAL, NOT_EQUAL, GREATER_THAN, GREATER_THAN_EQ, LESS_THAN, LESS_THAN_EQ;
+    }
+    
     /**
      * For expression leftN < rightN or leftN >= rightN:
      * refine the annotation of {@code leftN} if {@code rightN} is integer
@@ -280,18 +288,45 @@ public class IntRangeTransfer extends CFTransfer {
      *              If true, indicates the logic is flipped i.e (GreaterOrEqualThan)
      * @return
      */
-    protected TransferResult<CFValue, CFStore> strengthenAnnotationOfLessThan (
+    protected TransferResult<CFValue, CFStore> strengthenAnnotationOfComparison (
             TransferResult<CFValue, CFStore> res,
             Node leftN, Node rightN,
             CFValue firstValue, CFValue secondValue,
-            boolean notLessThan) {
+            ComparisonOperators op) {
         if (isCoveredKind(leftN) && isCoveredKind(rightN)) {
             Range leftRange = IntRangeAnnotatedTypeFactory.getIntRange(
                     firstValue.getType().getAnnotation(IntRange.class));
             Range rightRange = IntRangeAnnotatedTypeFactory.getIntRange(
                     secondValue.getType().getAnnotation(IntRange.class));
-            Range thenRange = leftRange.lessThan(rightRange);
-            Range elseRange = leftRange.greaterThanEq(rightRange);
+            Range thenRange, elseRange;
+            switch (op) {
+            case LESS_THAN:
+                thenRange = leftRange.lessThan(rightRange);
+                elseRange = leftRange.greaterThanEq(rightRange);
+                break;
+            case GREATER_THAN:
+                thenRange = leftRange.greaterThan(rightRange);
+                elseRange = leftRange.lessThanEq(rightRange);
+                break;
+            case LESS_THAN_EQ:
+                thenRange = leftRange.lessThanEq(rightRange);
+                elseRange = leftRange.greaterThan(rightRange);
+                break;
+            case GREATER_THAN_EQ:
+                thenRange = leftRange.greaterThanEq(rightRange);
+                elseRange = leftRange.lessThan(rightRange);
+                break;
+            case EQUAL:
+                thenRange = leftRange.equalTo(rightRange);
+                elseRange = leftRange.notEqualTo(rightRange);
+                break;
+            case NOT_EQUAL:
+                thenRange = leftRange.notEqualTo(rightRange);
+                elseRange = leftRange.equalTo(rightRange);
+                break;
+            default:
+                throw new UnsupportedOperationException();
+            }
             AnnotationMirror thenAnno = createIntRangeAnnotation(thenRange);
             AnnotationMirror elseAnno = createIntRangeAnnotation(elseRange);
             CFStore thenStore = res.getThenStore();
@@ -306,10 +341,8 @@ public class IntRangeTransfer extends CFTransfer {
                                 : thenStore;
                         elseStore = elseStore == null ? res.getElseStore()
                                 : elseStore;
-                        thenStore.insertValue(secondInternal, 
-                                notLessThan ? elseAnno : thenAnno);
-                        elseStore.insertValue(secondInternal, 
-                                notLessThan ? thenAnno : elseAnno);
+                        thenStore.insertValue(secondInternal, thenAnno);
+                        elseStore.insertValue(secondInternal, elseAnno);
                     }
                 }
             }
@@ -333,7 +366,36 @@ public class IntRangeTransfer extends CFTransfer {
         CFValue leftV = p.getValueOfSubNode(leftN);
         CFValue rightV = p.getValueOfSubNode(rightN);
 
-        return strengthenAnnotationOfLessThan(res, leftN, rightN, leftV, rightV, false);
+        return strengthenAnnotationOfComparison(res, leftN, rightN, leftV, rightV, 
+                ComparisonOperators.LESS_THAN);
+    }
+    
+    @Override
+    public TransferResult<CFValue, CFStore> visitLessThanOrEqual(LessThanOrEqualNode n,
+            TransferInput<CFValue, CFStore> p) {
+        TransferResult<CFValue, CFStore> res = super.visitLessThanOrEqual(n, p);
+
+        Node leftN = n.getLeftOperand();
+        Node rightN = n.getRightOperand();
+        CFValue leftV = p.getValueOfSubNode(leftN);
+        CFValue rightV = p.getValueOfSubNode(rightN);
+
+        return strengthenAnnotationOfComparison(res, leftN, rightN, leftV, rightV, 
+                ComparisonOperators.LESS_THAN_EQ);
+    }
+    
+    @Override
+    public TransferResult<CFValue, CFStore> visitGreaterThan(GreaterThanNode n,
+            TransferInput<CFValue, CFStore> p) {
+        TransferResult<CFValue, CFStore> res = super.visitGreaterThan(n, p);
+
+        Node leftN = n.getLeftOperand();
+        Node rightN = n.getRightOperand();
+        CFValue leftV = p.getValueOfSubNode(leftN);
+        CFValue rightV = p.getValueOfSubNode(rightN);
+
+        return strengthenAnnotationOfComparison(res, leftN, rightN, leftV, rightV, 
+                ComparisonOperators.GREATER_THAN);
     }
     
     @Override
@@ -346,7 +408,36 @@ public class IntRangeTransfer extends CFTransfer {
         CFValue leftV = p.getValueOfSubNode(leftN);
         CFValue rightV = p.getValueOfSubNode(rightN);
 
-        return strengthenAnnotationOfLessThan(res, leftN, rightN, leftV, rightV, true);
+        return strengthenAnnotationOfComparison(res, leftN, rightN, leftV, rightV, 
+                ComparisonOperators.GREATER_THAN_EQ);
+    }
+    
+    @Override
+    public TransferResult<CFValue, CFStore> visitEqualTo(EqualToNode n,
+            TransferInput<CFValue, CFStore> p) {
+        TransferResult<CFValue, CFStore> res = super.visitEqualTo(n, p);
+
+        Node leftN = n.getLeftOperand();
+        Node rightN = n.getRightOperand();
+        CFValue leftV = p.getValueOfSubNode(leftN);
+        CFValue rightV = p.getValueOfSubNode(rightN);
+
+        return strengthenAnnotationOfComparison(res, leftN, rightN, leftV, rightV, 
+                ComparisonOperators.EQUAL);
+    }
+    
+    @Override
+    public TransferResult<CFValue, CFStore> visitNotEqual(NotEqualNode n,
+            TransferInput<CFValue, CFStore> p) {
+        TransferResult<CFValue, CFStore> res = super.visitNotEqual(n, p);
+
+        Node leftN = n.getLeftOperand();
+        Node rightN = n.getRightOperand();
+        CFValue leftV = p.getValueOfSubNode(leftN);
+        CFValue rightV = p.getValueOfSubNode(rightN);
+
+        return strengthenAnnotationOfComparison(res, leftN, rightN, leftV, rightV, 
+                ComparisonOperators.NOT_EQUAL);
     }
     
 }
