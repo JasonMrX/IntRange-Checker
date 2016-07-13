@@ -167,7 +167,9 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             } else if (isSubtype(a2, a1)) {
                 return a2;
             } else {
-                return EMPTYRANGE;
+                Range range1 = getIntRange(a1);
+                Range range2 = getIntRange(a2);
+                return createIntRangeAnnotation(range1.intersect(range2));
             }
         }
 
@@ -182,7 +184,7 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             } else {
                 Range range1 = getIntRange(a1);
                 Range range2 = getIntRange(a2);
-                return createIntRangeAnnotation(range1.merge(range2));
+                return createIntRangeAnnotation(range1.union(range2));
             }
         }
          

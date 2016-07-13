@@ -19,7 +19,6 @@ import com.sun.source.tree.Tree.Kind;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeInfo;
 
-import intrange.qual.FullIntRange;
 import intrange.qual.IntRange;
 
 /**

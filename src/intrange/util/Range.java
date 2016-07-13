@@ -32,9 +32,15 @@ public class Range {
         return new Range(resultFrom, resultTo);
     }
     
-    public Range merge(Range right) {
+    public Range union(Range right) {
         long resultFrom = Math.min(from, right.from);
         long resultTo = Math.max(to, right.to);
+        return new Range(resultFrom, resultTo);
+    }
+    
+    public Range intersect(Range right) {
+        long resultFrom = Math.max(from, right.from);
+        long resultTo = Math.min(to, right.to);
         return new Range(resultFrom, resultTo);
     }
     

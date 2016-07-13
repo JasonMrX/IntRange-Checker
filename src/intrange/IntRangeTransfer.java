@@ -281,9 +281,9 @@ public class IntRangeTransfer extends CFTransfer {
      * @param leftN
      * @param rightN
      * @param firstValue
-     *              not used here
+     *              get left annotation
      * @param secondValue
-     *              not used here
+     *              get right annotation
      * @param notLessThan
      *              If true, indicates the logic is flipped i.e (GreaterOrEqualThan)
      * @return
