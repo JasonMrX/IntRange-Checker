@@ -22,14 +22,6 @@ public class Range {
         this.to = Long.MAX_VALUE;
     }
     
-    private Range buildRange(long from, long to) {
-        if (from > to) {
-            return new Range();
-        } else {
-            return new Range(from, to);
-        }
-    }    
-    
     private Range getRangeFromPossibleValues(long[] possibleValues) {
         long resultFrom = Long.MAX_VALUE;
         long resultTo = Long.MIN_VALUE;
@@ -37,25 +29,25 @@ public class Range {
             resultFrom = Math.min(resultFrom, pv);
             resultTo = Math.max(resultTo, pv);
         }
-        return buildRange(resultFrom, resultTo);
+        return new Range(resultFrom, resultTo);
     }
     
     public Range merge(Range right) {
         long resultFrom = Math.min(from, right.from);
         long resultTo = Math.max(to, right.to);
-        return buildRange(resultFrom, resultTo);
+        return new Range(resultFrom, resultTo);
     }
     
     public Range plus(Range right) {
         long resultFrom = from + right.from;
         long resultTo = to + right.to;
-        return buildRange(resultFrom, resultTo);
+        return new Range(resultFrom, resultTo);
     }
     
     public Range minus(Range right) {
         long resultFrom = from - right.to;
         long resultTo = to - right.from;
-        return buildRange(resultFrom, resultTo);
+        return new Range(resultFrom, resultTo);
     }
     
     public Range times(Range right) {
@@ -100,7 +92,7 @@ public class Range {
             resultFrom = Math.min(from, -to);
             resultTo = Math.max(-from, to);
         }
-        return buildRange(resultFrom, resultTo);
+        return new Range(resultFrom, resultTo);
     }
     
     public Range remainder(Range right) {
@@ -135,7 +127,7 @@ public class Range {
         }
         long resultFrom = from << (from >= 0 ? right.from : right.to);
         long resultTo = to << (to >= 0 ? right.to : right.from);
-        return buildRange(resultFrom, resultTo);
+        return new Range(resultFrom, resultTo);
     }
     
     public Range signedShiftRight(Range right) {
@@ -145,19 +137,19 @@ public class Range {
         }
         long resultFrom = from >> (from >= 0 ? right.to : right.from);
         long resultTo = to >> (to >= 0 ? right.from : right.to);
-        return buildRange(resultFrom, resultTo);
+        return new Range(resultFrom, resultTo);
     }
     
     public Range unaryPlus() {
-        return buildRange(from, to);
+        return new Range(from, to);
     }
     
     public Range unaryMinus() {
-        return buildRange(-to, -from);
+        return new Range(-to, -from);
     }
     
     public Range bitwiseComplement() {
-        return buildRange(~to, ~from);
+        return new Range(~to, ~from);
     }
     
     public Range lessThan(Range right) {

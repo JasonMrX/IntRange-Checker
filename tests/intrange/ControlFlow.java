@@ -61,11 +61,12 @@ class ControlFlow {
         
     }
     
-    public void comparison(@IntRange(from=0, to=100) int a) {
+    public void lessThan(@IntRange(from=0, to=100) int a) {
         @IntRange(from=0, to=30) int b;
         @IntRange(from=0, to=29) int c;
         @IntRange(from=31, to=100) int d;
         @IntRange(from=32, to=100) int e;
+        
         if (a < 31) {
             b = a; // OK
             //:: error: (assignment.type.incompatible)
@@ -74,6 +75,31 @@ class ControlFlow {
             d = a; // OK
             //:: error: (assignment.type.incompatible)
             e = a; // a has type @IntRange(31, 100);
+        }
+    }
+    
+    public void greaterThan(@IntRange(from=0, to=100) int a) {
+        @IntRange(from=0, to=30) int b;
+        @IntRange(from=0, to=29) int c;
+        @IntRange(from=31, to=100) int d;
+        @IntRange(from=32, to=100) int e;
+        
+        if (a > 30) {
+            d = a; // OK
+            //:: error: (assignment.type.incompatible)
+            e = a; // a has type @IntRange(31, 100);
+        } else {
+            b = a; // OK
+            //:: error: (assignment.type.incompatible)
+            c = a; // a has type @IntRange(0, 30);
+        }
+    }
+    
+    public void emptyRange(@IntRange(from=0, to=100) int a) {
+        @IntRange(from=0, to=10) int b;
+        
+        if (a > 120) {
+            b = a;// impossible
         }
     }
     
