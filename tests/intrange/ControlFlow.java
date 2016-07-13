@@ -59,17 +59,21 @@ class ControlFlow {
         // is this a control flow bug?
         //@IntRange(from=0, to=10) int l = a; //control flow
         
-        // can we handle these kind of control flow refinement?
-        if (k > 15) {
-            //@IntRange(from=15, to=30) int s = k;
-        }
-        
     }
     
     public void comparison(@IntRange(from=0, to=100) int a) {
-        @IntRange(from=0, to=50) int b;
-        if (a < 30) {
-            b = a; //OK
+        @IntRange(from=0, to=30) int b;
+        @IntRange(from=0, to=29) int c;
+        @IntRange(from=31, to=100) int d;
+        @IntRange(from=32, to=100) int e;
+        if (a < 31) {
+            b = a; // OK
+            //:: error: (assignment.type.incompatible)
+            c = a; // a has type @IntRange(0, 30);
+        } else {
+            d = a; // OK
+            //:: error: (assignment.type.incompatible)
+            e = a; // a has type @IntRange(31, 100);
         }
     }
     

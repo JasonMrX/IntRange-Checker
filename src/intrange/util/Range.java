@@ -23,8 +23,23 @@ public class Range {
     }
     
     public Range(long from, long to) {
-        this.from = from;
-        this.to = to;
+        if (from > to) {
+            this.from = Long.MIN_VALUE;
+            this.to = Long.MAX_VALUE;
+        } else {
+            this.from = from;
+            this.to = to;
+        }
+    }
+    
+    public Range(long from, long to, boolean isLogic) {
+        if (!isLogic && from > to) {
+            this.from = Long.MIN_VALUE;
+            this.to = Long.MAX_VALUE;
+        } else {
+            this.from = from;
+            this.to = to;
+        }
     }
     
     public Range() {
@@ -152,6 +167,29 @@ public class Range {
         return new Range(~to, ~from);
     }
     
+    public Range lessThan(Range right) {
+        return new Range(from, Math.min(to, right.to - 1), true);
+    }
+    
+    public Range lessThanEq(Range right) {
+        return new Range(from, Math.min(to, right.to), true);
+    }
+    
+    public Range greaterThan(Range right) {
+        return new Range(Math.max(from, right.from + 1), to, true);
+    }
+    
+    public Range greaterThanEq(Range right) {
+        return new Range(Math.max(from, right.from), to, true);
+    }
+    
+    public Range equalTo(Range right) {
+        return new Range(Math.max(from, right.from), Math.min(to, right.to));
+    }
+    
+    public Range notEqualTo(Range right) {
+        return new Range(from, to);
+    }
     /*
      * TODO:
      * How to handle overflow/underflow?
