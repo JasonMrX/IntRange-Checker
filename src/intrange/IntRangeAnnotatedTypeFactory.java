@@ -254,9 +254,10 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     }
 
     public AnnotationMirror createIntRangeAnnotation(Range range) {
-        if (range.from > range.to 
-                || (range.from == Long.MIN_VALUE && range.to == Long.MAX_VALUE)) {
+        if (range.from == Long.MIN_VALUE && range.to == Long.MAX_VALUE) {
             return FULLINTRANGE;
+        } else if (range.from > range.to) {
+            return EMPTYRANGE;
         }
         AnnotationBuilder builder = new AnnotationBuilder(processingEnv, IntRange.class);
         builder.setValue("from", range.from);
