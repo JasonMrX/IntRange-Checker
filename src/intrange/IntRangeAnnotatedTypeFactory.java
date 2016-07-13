@@ -257,6 +257,7 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         if (range.from > range.to
                 || range.from == Long.MIN_VALUE && range.to == Long.MAX_VALUE) {
             return FULLINTRANGE;
+        }
         AnnotationBuilder builder = new AnnotationBuilder(processingEnv, IntRange.class);
         builder.setValue("from", range.from);
         builder.setValue("to", range.to);
