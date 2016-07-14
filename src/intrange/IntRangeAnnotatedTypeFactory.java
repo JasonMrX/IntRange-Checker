@@ -50,6 +50,9 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         EMPTYRANGE = AnnotationUtils.fromClass(elements, EmptyRange.class);
         INTRANGE = AnnotationUtils.fromClass(elements, IntRange.class);
         FULLINTRANGE = AnnotationUtils.fromClass(elements, FullIntRange.class);
+        
+        addAliasedAnnotation(android.support.annotation.IntRange.class, INTRANGE);
+        
         if (this.getClass().equals(IntRangeAnnotatedTypeFactory.class)) {
             this.postInit();
         }
