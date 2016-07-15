@@ -64,6 +64,16 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
      * name); builder.setValue("from", from); builder.setValue("to", to); return
      * builder.build(); }
      */
+    
+    @Override 
+    public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
+        if (AnnotationUtils.areSameByClass(
+                anno, android.support.annotation.IntRange.class)) {
+            Range range = getIntRange(anno);
+            return createIntRangeAnnotation(range);
+        }
+        return super.aliasedAnnotation(anno);
+    }
 
     @Override 
     public CFTransfer createFlowTransferFunction(
