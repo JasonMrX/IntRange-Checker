@@ -14,7 +14,10 @@ class ControlFlow {
         } else if (c) {
             a = k;
         }
+        //:: error: (assignment.type.incompatible)
         @IntRange(from=0, to=30) int m = a;
+        
+        @IntRange(from=0, to=100) int n = a;
         
         if (true) {
             a = i;

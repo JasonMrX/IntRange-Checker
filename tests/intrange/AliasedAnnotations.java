@@ -8,5 +8,7 @@ class AliasedAnnotations {
         //:: error: (assignment.type.incompatible)
         @IntRange(from=0, to=10) int j = 13;
         
+        @IntRange(from=0) int k = 10;
+        
     }
 }
