@@ -4,13 +4,17 @@ class ControlFlow {
     
     public void leastUpperBound(
             boolean b,
+            boolean c,
             @IntRange(from=0, to=10) int i,
-            @IntRange(from=20, to=30) int j) {
+            @IntRange(from=20, to=30) int j,
+            @IntRange(from=50, to=100) int k) {
         int a = i;
         if (b) {
             a = j;
+        } else if (c) {
+            a = k;
         }
-        @IntRange(from=0, to=30) int k = a;
+        @IntRange(from=0, to=30) int m = a;
         
         if (true) {
             a = i;
