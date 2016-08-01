@@ -16,6 +16,10 @@ public class Range {
         this.from = from;
         this.to = to;
     }
+
+    public Range(long value) {
+        this(value, value);
+    }
     
     public Range() {
         this.from = Long.MIN_VALUE;

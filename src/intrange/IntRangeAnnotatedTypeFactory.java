@@ -1,10 +1,17 @@
 package intrange;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
+import org.checkerframework.common.value.qual.StaticallyExecutable;
 import org.checkerframework.framework.flow.CFAbstractAnalysis;
 import org.checkerframework.framework.flow.CFTransfer;
 import org.checkerframework.framework.flow.CFStore;
@@ -24,8 +31,10 @@ import org.checkerframework.framework.util.GraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
 
+import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
@@ -271,8 +280,8 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         public Void visitTypeCast(TypeCastTree tree, AnnotatedTypeMirror type) {
             if (TypesUtils.isIntegral(type.getUnderlyingType())) {
                 AnnotatedTypeMirror castedAnnotation = getAnnotatedType(tree.getExpression());
-                if (TypesUtils.isIntegral(castedAnnotation.getUnderlyingType())) {
-                    Range range = getRange(castedAnnotation);
+                Range range = getRange(castedAnnotation);
+                if (range != null) {
                     AnnotationMirror anno = createIntRangeAnnotation(range);
                     type.replaceAnnotation(anno);
                 }
@@ -281,9 +290,52 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
         
         private Range getRange(AnnotatedTypeMirror type) {
-   
+            if (!TypesUtils.isIntegral(type.getUnderlyingType())) {
+                return null;
+            } 
             AnnotationMirror anno = type.getAnnotationInHierarchy(FULLINTRANGE);
-            return IntRangeAnnotatedTypeFactory.getIntRange(anno);
+            return getIntRange(anno);
+        }
+        
+        @Override
+        public Void visitNewClass(NewClassTree tree, AnnotatedTypeMirror type) {
+            boolean wrapperClass = isBoxedIntegral(type.getUnderlyingType());
+            if (wrapperClass) {
+                // get arugment values
+                List<? extends ExpressionTree> arguments = tree.getArguments();
+                if (arguments.size() == 1) {
+                    // wrapper constructor only take one argument
+                    ExpressionTree argument = arguments.get(0);
+                    AnnotatedTypeMirror argType = getAnnotatedType(argument);
+                    Range argRange;
+                    if (argument.getKind() == Tree.Kind.STRING_LITERAL) {
+                        // to handle wrapper constructor with String input
+                        long value = new Integer(((LiteralTree) argument).getValue().toString());
+                        argRange = new Range(value);
+                    } else {
+                        // to handle integral cases; return null if not integral type
+                        argRange = getRange(argType);
+                    }
+                    if (argRange != null) {
+                        AnnotationMirror anno = createIntRangeAnnotation(argRange);
+                        type.replaceAnnotation(anno);
+                    }
+                }
+            }
+            return null;
+        }
+        
+        private boolean isBoxedIntegral(TypeMirror type) {
+            if (type.getKind() != TypeKind.DECLARED) {
+                return false;
+            }
+            String qualifiedName = TypesUtils.getQualifiedName((DeclaredType) type).toString();
+            return (qualifiedName.equals("java.lang.Byte")
+                    || qualifiedName.equals("java.lang.Short")
+                    || qualifiedName.equals("java.lang.Integer")
+                    || qualifiedName.equals("java.lang.Character")
+                    || qualifiedName.equals("Java.lang.Float"));
+            
         }
         
     }
