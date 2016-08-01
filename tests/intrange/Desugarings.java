@@ -1,5 +1,3 @@
-//import org.checkerframework.common.value.qual.IntVal;
-
 import intrange.qual.IntRange;
 
 class Desugarings {

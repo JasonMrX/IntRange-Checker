@@ -268,14 +268,18 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         @Override
         public Void visitTypeCast(TypeCastTree tree, AnnotatedTypeMirror type) {
             if (isCoveredKind(type.getUnderlyingType().getKind())) {
-                Range range = getRange(getAnnotatedType(tree.getExpression()));
-                AnnotationMirror anno = createIntRangeAnnotation(range);
-                type.replaceAnnotation(anno);
+                AnnotatedTypeMirror castedAnnotation = getAnnotatedType(tree.getExpression());
+                if (isCoveredKind(castedAnnotation.getKind())) {
+                    Range range = getRange(castedAnnotation);
+                    AnnotationMirror anno = createIntRangeAnnotation(range);
+                    type.replaceAnnotation(anno);
+                }
             }
             return null; 
         }
         
         private Range getRange(AnnotatedTypeMirror type) {
+   
             AnnotationMirror anno = type.getAnnotationInHierarchy(FULLINTRANGE);
             return IntRangeAnnotatedTypeFactory.getIntRange(anno);
         }
