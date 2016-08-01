@@ -24,8 +24,10 @@ import org.checkerframework.framework.util.GraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.TypesUtils;
 
 import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
@@ -240,7 +242,7 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         @Override
         public Void visitLiteral(LiteralTree tree, AnnotatedTypeMirror type) {
-            if (isCoveredKind(type.getUnderlyingType().getKind())) {
+            if (TypesUtils.isIntegral(type.getUnderlyingType())) {
                 long value;
                 switch (tree.getKind()) {
                 case INT_LITERAL:
@@ -267,9 +269,9 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         
         @Override
         public Void visitTypeCast(TypeCastTree tree, AnnotatedTypeMirror type) {
-            if (isCoveredKind(type.getUnderlyingType().getKind())) {
+            if (TypesUtils.isIntegral(type.getUnderlyingType())) {
                 AnnotatedTypeMirror castedAnnotation = getAnnotatedType(tree.getExpression());
-                if (isCoveredKind(castedAnnotation.getKind())) {
+                if (TypesUtils.isIntegral(castedAnnotation.getUnderlyingType())) {
                     Range range = getRange(castedAnnotation);
                     AnnotationMirror anno = createIntRangeAnnotation(range);
                     type.replaceAnnotation(anno);
@@ -312,14 +314,7 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                             rangeAnno, "to", Long.class, true));
         }
     }
-    
-    public static boolean isCoveredKind(TypeKind kind) {  
-        return (kind == TypeKind.INT 
-                || kind == TypeKind.LONG 
-                || kind == TypeKind.CHAR
-                || kind == TypeKind.SHORT
-                || kind == TypeKind.BYTE);
-    }
+
     /**
      * TODO:
      * underflow/overflow detect

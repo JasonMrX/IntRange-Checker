@@ -32,6 +32,7 @@ import org.checkerframework.framework.flow.CFStore;
 import org.checkerframework.framework.flow.CFTransfer;
 import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
+import org.checkerframework.javacutil.TypesUtils;
 
 import intrange.IntRangeAnnotatedTypeFactory;
 import intrange.qual.IntRange;
@@ -56,7 +57,7 @@ public class IntRangeTransfer extends CFTransfer {
     }
 
     private boolean isCoveredKind(Node n) {
-        return IntRangeAnnotatedTypeFactory.isCoveredKind(n.getType().getKind());
+        return TypesUtils.isIntegral(n.getType());
     }
     
     private AnnotationMirror createIntRangeAnnotation(Range range) {
