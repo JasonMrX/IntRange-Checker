@@ -23,6 +23,9 @@ class Desugarings {
         @IntRange(from=3, to=3) int b = (i -= 3);
         @IntRange(from=9, to=9) int c = (i *= 3);
         @IntRange(from=3, to=3) int d = (i /= 3);
+        
+        short s = 3;
+        @IntRange(from=6, to=6) int e = (s += 3);
     }
 
 }

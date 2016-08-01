@@ -10,10 +10,12 @@ public class Binaries {
     public void add(
             @IntRange(from=-5, to=5) int a,
             @IntRange(from=10, to=20) int b,
-            int fullRange) {
+            @IntRange(from=0, to=5) short s) {
         //:: error: (assignment.type.incompatible)
         @IntRange(from=6, to=25) int plus1 = a + b; // error
         @IntRange(from=0, to=25) int plus2 = a + b; //OK
+        
+        @IntRange(from=-5, to=10) int plus3 = a + s; //OK
     }
     
     public void subtract(

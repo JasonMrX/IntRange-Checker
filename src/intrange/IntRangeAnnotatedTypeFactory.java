@@ -316,7 +316,9 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     public static boolean isCoveredKind(TypeKind kind) {  
         return (kind == TypeKind.INT 
                 || kind == TypeKind.LONG 
-                || kind == TypeKind.CHAR);
+                || kind == TypeKind.CHAR
+                || kind == TypeKind.SHORT
+                || kind == TypeKind.BYTE);
     }
     /**
      * TODO:
