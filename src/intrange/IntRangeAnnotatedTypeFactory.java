@@ -1,6 +1,7 @@
 package intrange;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.type.TypeKind;
 
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
@@ -26,6 +27,7 @@ import org.checkerframework.javacutil.AnnotationUtils;
 
 import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.Tree;
+import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
 
 import intrange.qual.EmptyRange;
@@ -238,11 +240,7 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         @Override
         public Void visitLiteral(LiteralTree tree, AnnotatedTypeMirror type) {
-            String underlyingType = type.getUnderlyingType().toString();
-
-            if (underlyingType.equals("int") || underlyingType.equals("java.lang.Integer")
-                    || underlyingType.equals("char") || underlyingType.equals("java.lang.Character")
-                    || underlyingType.equals("long") || underlyingType.equals("java.lang.Long")) {
+            if (isCoveredKind(type.getUnderlyingType().getKind())) {
                 long value;
                 switch (tree.getKind()) {
                 case INT_LITERAL:
@@ -266,6 +264,22 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
             return null;
         }
+        
+        @Override
+        public Void visitTypeCast(TypeCastTree tree, AnnotatedTypeMirror type) {
+            if (isCoveredKind(type.getUnderlyingType().getKind())) {
+                Range range = getRange(getAnnotatedType(tree.getExpression()));
+                AnnotationMirror anno = createIntRangeAnnotation(range);
+                type.replaceAnnotation(anno);
+            }
+            return null; 
+        }
+        
+        private Range getRange(AnnotatedTypeMirror type) {
+            AnnotationMirror anno = type.getAnnotationInHierarchy(FULLINTRANGE);
+            return IntRangeAnnotatedTypeFactory.getIntRange(anno);
+        }
+        
     }
 
     public AnnotationMirror createIntRangeAnnotation(Range range) {
@@ -295,6 +309,11 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
     }
     
+    public static boolean isCoveredKind(TypeKind kind) {  
+        return (kind == TypeKind.INT 
+                || kind == TypeKind.LONG 
+                || kind == TypeKind.CHAR);
+    }
     /**
      * TODO:
      * underflow/overflow detect

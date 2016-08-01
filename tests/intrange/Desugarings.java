@@ -1,3 +1,5 @@
+//import org.checkerframework.common.value.qual.IntVal;
+
 import intrange.qual.IntRange;
 
 class Desugarings {
@@ -23,6 +25,6 @@ class Desugarings {
         @IntRange(from=3, to=3) int b = (i -= 3);
         @IntRange(from=9, to=9) int c = (i *= 3);
         @IntRange(from=3, to=3) int d = (i /= 3);
-        @IntRange(from=1, to=1) int e = (i %= 2);
     }
+
 }

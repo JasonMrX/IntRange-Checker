@@ -1,11 +1,8 @@
 package intrange;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.type.TypeKind;
 
 import org.checkerframework.dataflow.analysis.ConditionalTransferResult;
 import org.checkerframework.dataflow.analysis.FlowExpressions;
@@ -52,21 +49,14 @@ public class IntRangeTransfer extends CFTransfer {
     
     AnnotatedTypeFactory atypefactory;
     
-    private Set<TypeKind> coveredKinds;
-    
     public IntRangeTransfer(
             CFAbstractAnalysis<CFValue, CFStore, CFTransfer> analysis) {
         super(analysis);
         atypefactory = analysis.getTypeFactory();
-        
-        coveredKinds = new HashSet<TypeKind>(3);
-        coveredKinds.add(TypeKind.INT);
-        coveredKinds.add(TypeKind.LONG);
-        coveredKinds.add(TypeKind.CHAR);
     }
 
     private boolean isCoveredKind(Node n) {
-        return coveredKinds.contains(n.getType().getKind());
+        return IntRangeAnnotatedTypeFactory.isCoveredKind(n.getType().getKind());
     }
     
     private AnnotationMirror createIntRangeAnnotation(Range range) {
