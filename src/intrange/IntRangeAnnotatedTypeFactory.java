@@ -338,6 +338,12 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             
         }
         
+        /**
+         * TODO:
+         * visitMethodInvocation
+         * visitNewArray
+         */
+        
     }
 
     public AnnotationMirror createIntRangeAnnotation(Range range) {
