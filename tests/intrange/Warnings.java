@@ -21,4 +21,13 @@ public class Warnings {
         @IntRange(from=-20000000000L, to=2000000000L) long b; //OK
     }
 	
+    public void divisionByZero(
+            @IntRange(from=-2, to=-1) int a,
+            @IntRange(from=1, to=2) int b) {
+        int c;
+        c = 3 / a;
+        c = 3 / b;
+        //:: warning: (possible.division.by.zero)
+        c = 3 / (a + b);
+    }
 }

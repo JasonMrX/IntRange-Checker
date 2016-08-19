@@ -3,15 +3,20 @@ package intrange;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.basetype.BaseTypeVisitor;
 import org.checkerframework.framework.source.Result;
+import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.javacutil.AnnotationUtils;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
+import javax.lang.model.type.TypeKind;
 
 import com.sun.source.tree.AnnotationTree;
 import com.sun.source.tree.AssignmentTree;
+import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.Tree;
@@ -19,7 +24,10 @@ import com.sun.source.tree.Tree.Kind;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeInfo;
 
+import intrange.qual.EmptyRange;
+import intrange.qual.FullIntRange;
 import intrange.qual.IntRange;
+import intrange.util.Range;
 
 /**
  * Visitor for the Integer Range Type System
@@ -30,19 +38,37 @@ import intrange.qual.IntRange;
 public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactory> {
 
     private Set<Kind> coveredKinds;
+    
+    private Set<TypeKind> coveredTypeKinds;
+    
+    protected final AnnotationMirror EMPTYRANGE, INTRANGE, FULLINTRANGE;
 
     public IntRangeVisitor(BaseTypeChecker checker) {
         super(checker);
 
         coveredKinds = new HashSet<Kind>(3);
-        coveredKinds.add(Tree.Kind.INT_LITERAL);
-        coveredKinds.add(Tree.Kind.LONG_LITERAL);
-        coveredKinds.add(Tree.Kind.CHAR_LITERAL);
+        coveredKinds.add(Kind.INT_LITERAL);
+        coveredKinds.add(Kind.LONG_LITERAL);
+        coveredKinds.add(Kind.CHAR_LITERAL);
+        
+        coveredTypeKinds = new HashSet<TypeKind>(5);
+        coveredTypeKinds.add(TypeKind.BYTE);
+        coveredTypeKinds.add(TypeKind.SHORT);
+        coveredTypeKinds.add(TypeKind.CHAR);
+        coveredTypeKinds.add(TypeKind.INT);
+        coveredTypeKinds.add(TypeKind.LONG);
 
+        EMPTYRANGE = AnnotationUtils.fromClass(elements, EmptyRange.class);
+        INTRANGE = AnnotationUtils.fromClass(elements, IntRange.class);
+        FULLINTRANGE = AnnotationUtils.fromClass(elements, FullIntRange.class);
     }
 
     private boolean isCoveredKind(Kind k) {
         return coveredKinds.contains(k);
+    }
+    
+    private boolean isCoveredTypeKind(TypeKind tk) {
+        return coveredTypeKinds.contains(tk);
     }
 
     private long getValueFromCoveredKinds(ExpressionTree exp) {
@@ -100,6 +126,40 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
         }
 
         return super.visitAnnotation(node, p);
+    }
+    
+    @Override
+    public Void visitBinary(BinaryTree node, Void p) {
+        ExpressionTree nodeLeft = node.getLeftOperand();
+        ExpressionTree nodeRight = node.getRightOperand();
+        AnnotatedTypeMirror typeLeft = atypeFactory.getAnnotatedType(nodeLeft);
+        AnnotatedTypeMirror typeRight = atypeFactory.getAnnotatedType(nodeRight);
+        if (!isCoveredTypeKind(typeLeft.getKind()) 
+                || !isCoveredTypeKind(typeRight.getKind())) {
+            return super.visitBinary(node, p);
+        }
+     
+        switch(node.getKind()) {
+        case REMAINDER:
+        case DIVIDE:
+            visitDivision(node);
+            break;
+        default:
+        }
+        return super.visitBinary(node, p);
+    }
+    
+    private void visitDivision(BinaryTree node) {
+        Range rangeRight = getIntRange(node.getRightOperand());
+        if (rangeRight.from <= 0 && rangeRight.to >= 0) {
+            checker.report(Result.warning("possible.division.by.zero", rangeRight.from, rangeRight.to), node);
+        }
+    }
+    
+    private Range getIntRange(ExpressionTree node) {
+        AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
+        AnnotationMirror anno = type.getAnnotationInHierarchy(FULLINTRANGE);
+        return IntRangeAnnotatedTypeFactory.getIntRange(anno);
     }
 
 }

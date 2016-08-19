@@ -43,6 +43,7 @@ public class Binaries {
         @IntRange(from=-400, to=-100) int mult6 = b * c; //OK
     }
     
+    @SuppressWarnings("intrange:possible.division.by.zero")
     public void divide(
             @IntRange(from=5, to=10) int gtz,
             @IntRange(from=0, to=5) int gez,
@@ -113,6 +114,7 @@ public class Binaries {
         @IntRange(from=-5, to=4) int s93 = ze / ze; 
     }
     
+    @SuppressWarnings("intrange:possible.division.by.zero")
     public void remainder(
             @IntRange(from=5, to=10) int a,
             @IntRange(from=1, to=7) int b) {
