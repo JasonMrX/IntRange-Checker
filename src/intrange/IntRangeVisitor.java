@@ -142,18 +142,19 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
         switch(node.getKind()) {
         case REMAINDER:
         case DIVIDE:
-            visitDivision(node);
+        {
+            Range rangeRight = getIntRange(node.getRightOperand());
+            if (rangeRight.from <= 0 && rangeRight.to >= 0) {
+                checker.report(Result.warning("possible.division.by.zero", rangeRight.from, rangeRight.to), node);
+            }
             break;
+        }
+        case LEFT_SHIFT:
+        case RIGHT_SHIFT:
+        case UNSIGNED_RIGHT_SHIFT:       
         default:
         }
         return super.visitBinary(node, p);
-    }
-    
-    private void visitDivision(BinaryTree node) {
-        Range rangeRight = getIntRange(node.getRightOperand());
-        if (rangeRight.from <= 0 && rangeRight.to >= 0) {
-            checker.report(Result.warning("possible.division.by.zero", rangeRight.from, rangeRight.to), node);
-        }
     }
     
     private Range getIntRange(ExpressionTree node) {
