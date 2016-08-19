@@ -126,6 +126,7 @@ public class Binaries {
         
     }
      
+    @SuppressWarnings("intrange:shift.out.of.range")
     public void shiftLeft(
             @IntRange(from=2, to=10) int l,
             @IntRange(from=1, to=2) int r) {
@@ -148,7 +149,8 @@ public class Binaries {
         //:: error: (assignment.type.incompatible)
         @IntRange(from=-2000000L, to=2000000L) int i = l << -1;   
     }
-    
+
+    @SuppressWarnings("intrange:shift.out.of.range")
     public void signedShiftRight(
             @IntRange(from=-8, to=-3) int l,
             @IntRange(from=1, to=2) int r) {

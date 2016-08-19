@@ -151,7 +151,14 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
         }
         case LEFT_SHIFT:
         case RIGHT_SHIFT:
-        case UNSIGNED_RIGHT_SHIFT:       
+        case UNSIGNED_RIGHT_SHIFT:    
+        {
+            Range rangeRight = getIntRange(node.getRightOperand());
+            if (rangeRight.from < 0 || rangeRight.to > 31) {
+                // assume from <= to here
+                checker.report(Result.warning("shift.out.of.range"), node);
+            }
+        }
         default:
         }
         return super.visitBinary(node, p);

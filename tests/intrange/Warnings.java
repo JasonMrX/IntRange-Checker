@@ -30,4 +30,27 @@ public class Warnings {
         //:: warning: (possible.division.by.zero)
         c = 3 / (a + b);
     }
+    
+    public void shiftOutOfRange() {
+        int a;
+        int bit = 5;
+
+        //:: warning: (shift.out.of.range)
+        a = 3 << -1;
+        //:: warning: (shift.out.of.range)
+        a = 3 << 32;
+        a = 3 << bit;
+
+        //:: warning: (shift.out.of.range)
+        a = 3 >> -1;
+        //:: warning: (shift.out.of.range)
+        a = 3 >> 32;
+        a = 3 >> bit;
+
+        //:: warning: (shift.out.of.range)
+        a = 3 >>> -1;
+        //:: warning: (shift.out.of.range)
+        a = 3 >>> 32;
+        a = 3 >>> bit;
+    }
 }
