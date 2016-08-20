@@ -168,6 +168,7 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
                                 rangeRight.to), 
                         node.getRightOperand());
             }
+            break;
         }
         default:
         }
