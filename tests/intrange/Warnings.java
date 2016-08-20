@@ -53,4 +53,15 @@ public class Warnings {
         a = 3 >>> 32;
         a = 3 >>> bit;
     }
+    
+    public void negativeArrayDim(int dim) {
+        int[] arr = new int[3];
+        //:: warning: (possible.negative.array.dimension)
+        int[] arr1 = new int[-1];
+        //:: warning: (possible.negative.array.dimension)
+        int[] arr2 = new int[dim];
+        //:: warning: (possible.negative.array.dimension)
+        int[][] arr3 = new int[3][dim];
+    }
+    
 }

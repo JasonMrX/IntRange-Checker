@@ -364,6 +364,10 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     public static Range getIntRange(AnnotationMirror rangeAnno) {
         if (rangeAnno == null) {
             return new Range();
+        } else if (AnnotationUtils.areSameByClass(rangeAnno, FullIntRange.class)) {
+            return new Range();
+        } else if (AnnotationUtils.areSameByClass(rangeAnno, EmptyRange.class)) {
+            return null;
         } else {
             return new Range(
                     AnnotationUtils.getElementValue(

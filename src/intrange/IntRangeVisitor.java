@@ -19,6 +19,7 @@ import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.tools.javac.tree.JCTree;
@@ -145,7 +146,7 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
         {
             Range rangeRight = getIntRange(node.getRightOperand());
             if (rangeRight.from <= 0 && rangeRight.to >= 0) {
-                checker.report(Result.warning("possible.division.by.zero", rangeRight.from, rangeRight.to), node);
+                checker.report(Result.warning("possible.division.by.zero", rangeRight.from, rangeRight.to), node.getRightOperand());
             }
             break;
         }
@@ -156,12 +157,24 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
             Range rangeRight = getIntRange(node.getRightOperand());
             if (rangeRight.from < 0 || rangeRight.to > 31) {
                 // assume from <= to here
-                checker.report(Result.warning("shift.out.of.range"), node);
+                checker.report(Result.warning("shift.out.of.range"), node.getRightOperand());
             }
         }
         default:
         }
         return super.visitBinary(node, p);
+    }
+    
+    @Override
+    public Void visitNewArray(NewArrayTree node, Void p) {
+        List<? extends ExpressionTree> dimensions = node.getDimensions();
+        for (ExpressionTree dim : dimensions) {
+            Range rangeDim = getIntRange(dim);
+            if (rangeDim.from < 0) {
+                checker.report(Result.warning("possible.negative.array.dimension"), dim);
+            }
+        }
+        return super.visitNewArray(node, p);
     }
     
     private Range getIntRange(ExpressionTree node) {
