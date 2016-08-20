@@ -15,6 +15,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeKind;
 
 import com.sun.source.tree.AnnotationTree;
+import com.sun.source.tree.ArrayAccessTree;
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ExpressionTree;
@@ -119,7 +120,9 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
                 long valueTo = getValueFromCoveredKinds(expTo);
 
                 if (valueFrom > valueTo) {
-                    checker.report(Result.warning("from.greater.than.to", valueFrom, valueTo), node);
+                    checker.report(Result.warning("from.greater.than.to", 
+                                    valueFrom, 
+                                    valueTo), node);
                 }
 
             }
@@ -146,7 +149,10 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
         {
             Range rangeRight = getIntRange(node.getRightOperand());
             if (rangeRight.from <= 0 && rangeRight.to >= 0) {
-                checker.report(Result.warning("possible.division.by.zero", rangeRight.from, rangeRight.to), node.getRightOperand());
+                checker.report(Result.warning("possible.division.by.zero", 
+                                rangeRight.from, 
+                                rangeRight.to), 
+                        node.getRightOperand());
             }
             break;
         }
@@ -157,7 +163,10 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
             Range rangeRight = getIntRange(node.getRightOperand());
             if (rangeRight.from < 0 || rangeRight.to > 31) {
                 // assume from <= to here
-                checker.report(Result.warning("shift.out.of.range"), node.getRightOperand());
+                checker.report(Result.warning("shift.out.of.range", 
+                                rangeRight.from, 
+                                rangeRight.to), 
+                        node.getRightOperand());
             }
         }
         default:
@@ -171,10 +180,24 @@ public class IntRangeVisitor extends BaseTypeVisitor<IntRangeAnnotatedTypeFactor
         for (ExpressionTree dim : dimensions) {
             Range rangeDim = getIntRange(dim);
             if (rangeDim.from < 0) {
-                checker.report(Result.warning("possible.negative.array.dimension"), dim);
+                checker.report(Result.warning("possible.negative.array.dimension",
+                                rangeDim.from,
+                                rangeDim.to), dim);
             }
         }
         return super.visitNewArray(node, p);
+    }
+    
+    @Override
+    public Void visitArrayAccess(ArrayAccessTree node, Void p) {
+        ExpressionTree idxNode = node.getIndex();
+        Range idxRange = getIntRange(idxNode);
+        if (idxRange.from < 0) {
+            checker.report(Result.warning("possible.negative.array.index", 
+                            idxRange.from,
+                            idxRange.to), idxNode);
+        }
+        return super.visitArrayAccess(node, p);
     }
     
     private Range getIntRange(ExpressionTree node) {

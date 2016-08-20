@@ -64,4 +64,13 @@ public class Warnings {
         int[][] arr3 = new int[3][dim];
     }
     
+    public void negativeArrayAccess(String[] strArray, int idx) {
+        int nn = 3;
+        //:: warning: (possible.negative.array.index)
+        String a = strArray[-1];
+        //:: warning: (possible.negative.array.index)
+        String b = strArray[idx];
+        String c = strArray[nn];
+    }
+    
 }
