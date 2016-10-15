@@ -94,38 +94,6 @@ public class IntRangeAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         return new IntRangeTransfer(analysis);
     }
     
-    @Override
-    public AnnotatedTypeMirror getAnnotatedType(Tree tree) {
-        if (tree.getKind() == Tree.Kind.POSTFIX_DECREMENT
-                || tree.getKind() == Tree.Kind.POSTFIX_INCREMENT) {
-            return getPostFixAnno((UnaryTree) tree,
-                    super.getAnnotatedType(tree));
-        } else {
-            return super.getAnnotatedType(tree);
-        }
-    }
-    
-    private AnnotatedTypeMirror getPostFixAnno(UnaryTree tree,
-            AnnotatedTypeMirror anno) {
-        if (anno.hasAnnotation(IntRange.class)) {
-            return postFixInt(anno, 
-                    tree.getKind() == Tree.Kind.POSTFIX_INCREMENT);
-        }
-        return anno;
-    }
-    
-    private AnnotatedTypeMirror postFixInt(AnnotatedTypeMirror anno, 
-            boolean increment) {
-        Range range = getIntRange(anno.getAnnotation(IntRange.class));
-        Range resultRange;
-        if (increment) {
-            resultRange = new Range(range.from - 1, range.to - 1);
-        } else {
-            resultRange = new Range(range.from + 1, range.to + 1);
-        }
-        anno.replaceAnnotation(createIntRangeAnnotation(resultRange));
-        return anno;
-    }
     
     @Override
     public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
