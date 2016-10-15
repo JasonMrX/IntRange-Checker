@@ -32,6 +32,7 @@ import org.checkerframework.framework.flow.CFStore;
 import org.checkerframework.framework.flow.CFTransfer;
 import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
+import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.TypesUtils;
 
 import intrange.IntRangeAnnotatedTypeFactory;
@@ -73,16 +74,18 @@ public class IntRangeTransfer extends CFTransfer {
         }
         AnnotationMirror stringVal = createIntRangeAnnotation(resultRange);
         CFValue newResultValue = analysis.createSingleAnnotationValue(
-                stringVal, result.getResultValue().getType().getUnderlyingType());
+                stringVal, result.getResultValue().getUnderlyingType());
         return new RegularTransferResult<>(newResultValue,
                 result.getRegularStore());
     }
     
-    private Range getIntRange(Node subNode, 
-            TransferInput<CFValue, CFStore> p) {
-        CFValue value = p.getValueOfSubNode(subNode);
-        AnnotationMirror rangeAnno = value.getType().getAnnotation(IntRange.class);
-        return IntRangeAnnotatedTypeFactory.getIntRange(rangeAnno);
+    private Range getIntRange(CFValue value) {
+        for (AnnotationMirror anno : value.getAnnotations()) {
+            if (AnnotationUtils.areSameByClass(anno, IntRange.class)) {
+                return IntRangeAnnotatedTypeFactory.getIntRange(anno);
+            }
+        }
+        return new Range();
     }
     
     /**
@@ -109,8 +112,8 @@ public class IntRangeTransfer extends CFTransfer {
                 || !isCoveredKind(rightNode)) {
             return null;
         }
-        Range leftRange = getIntRange(leftNode, p);
-        Range rightRange = getIntRange(rightNode, p);
+        Range leftRange = getIntRange(p.getValueOfSubNode(leftNode));
+        Range rightRange = getIntRange(p.getValueOfSubNode(rightNode));
         switch (op) {
         case ADDITION:
             return leftRange.plus(rightRange);
@@ -217,7 +220,7 @@ public class IntRangeTransfer extends CFTransfer {
         if (!isCoveredKind(operand)) {
             return null;
         }
-        Range operandRange = getIntRange(operand, p);
+        Range operandRange = getIntRange(p.getValueOfSubNode(operand));
         switch (op) {
         case PLUS:
             return operandRange.unaryPlus();
@@ -285,10 +288,8 @@ public class IntRangeTransfer extends CFTransfer {
             CFValue firstValue, CFValue secondValue,
             ComparisonOperators op) {
         if (isCoveredKind(leftN) && isCoveredKind(rightN)) {
-            Range leftRange = IntRangeAnnotatedTypeFactory.getIntRange(
-                    firstValue.getType().getAnnotation(IntRange.class));
-            Range rightRange = IntRangeAnnotatedTypeFactory.getIntRange(
-                    secondValue.getType().getAnnotation(IntRange.class));
+            Range leftRange = getIntRange(firstValue);
+            Range rightRange = getIntRange(secondValue);
             Range thenRange, elseRange;
             switch (op) {
             case LESS_THAN:
